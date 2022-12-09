@@ -3,6 +3,8 @@
 #include "map.h"
 #include <stdio.h>
 
+#include "building.hpp"
+
 using namespace Astralbrew::World;
 using namespace Astralbrew;
 
@@ -115,7 +117,9 @@ public:
 		display(map_x,map_y,0,160);		
 		flip_page();
 		
-		dmaCopy(ROA_map_pal, BG_PALETTE, ROA_map_pal_len);				
+		dmaCopy(ROA_map_pal, BG_PALETTE, ROA_map_pal_len);		
+
+		init_buildings_gfx();
 	}	
 	
 	int frame_cnt = 0;
