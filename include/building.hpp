@@ -22,7 +22,8 @@ private:
 	int px_width, px_height;
 	int rows_count, cols_count;	
 public:
-	Building(const short* res_gfx, int px_width, int px_height, int rows_count, int cols_count);	
+	Building(const short* res_gfx, int px_width, int px_height, int rows_count, int cols_count);
+	Building(const short* res_gfx); // and let the code choose the right settings
 	
 	const short* get_res_gfx() const;
 	
@@ -47,10 +48,12 @@ private:
 	Astralbrew::Memory::Address vram_addr;
 	const Building* building;
 	Sprite* auxiliary[3] = {nullptr, nullptr, nullptr};
-	Astralbrew::Memory::Address aux_vram[3];
+	Astralbrew::Memory::Address aux_vram[3];	
 	
 public:
 	BuildingSprite(const Building* building);
+	
+	void update(const Astralbrew::World::Camera* camera = nullptr);
 	
 	~BuildingSprite();
 };

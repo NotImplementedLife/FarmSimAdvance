@@ -57,8 +57,7 @@ private:
 	void drawBuilding(const Building* building, int x, int y)
 	{		
 		BuildingSprite* bld = new BuildingSprite(building);		
-		bld->update_visual();
-		bld->update_position(nullptr);
+		bld->update();
 		OamPool::deploy();
 		building->copy_gfx(0,0,building->get_px_width(), building->get_px_height(), BACK, 240, x, y);
 	}
@@ -125,7 +124,8 @@ public:
 		map_x=264;
 		map_y=208;
 		display(map_x,map_y,0,160);		
-		drawBuilding(new Building(BLD_SMALL_PLOT, 24,16, 9,5), 16, 16);
+		//drawBuilding(new Building(BLD_MEDIUM_PLOT), 16, 16);
+		drawBuilding(new Building(BLD_CHICKEN_COOP), 16, 16);
 		flip_page();
 		
 		dmaCopy(ROA_map_pal, BG_PALETTE, ROA_map_pal_len);			

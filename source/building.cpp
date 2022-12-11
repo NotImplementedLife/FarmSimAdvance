@@ -46,6 +46,31 @@ Building::Building(const short* res_gfx, int px_width, int px_height, int rows_c
 	this->cols_count = cols_count;
 }
 
+Building::Building(const short* res_gfx)
+{
+	this->res_gfx = res_gfx;
+	if(res_gfx == BLD_SMALL_PLOT || res_gfx == BLD_SAND_ROAD)
+	{
+		px_width = 24, px_height = 16, rows_count = 1, cols_count = 1; return;
+	}
+	else if(res_gfx == BLD_MEDIUM_PLOT)	
+	{
+		px_width = 72, px_height = 32, rows_count = 3, cols_count = 3; return;
+	}
+	else if(res_gfx == BLD_LARGE_PLOT)	
+	{
+		px_width = 72, px_height = 48, rows_count = 5, cols_count = 3; return;
+	}	
+	else if(res_gfx == BLD_CHICKEN_COOP)	
+	{
+		px_width = 120, px_height = 80, rows_count = 9, cols_count = 5; return;
+	}
+	else
+	{
+		FATAL_ERROR("res_gfx unknown");
+	}	
+}
+
 const short* Building::get_res_gfx() const { return res_gfx;}
 
 int Building::get_px_width() const { return px_width;}
