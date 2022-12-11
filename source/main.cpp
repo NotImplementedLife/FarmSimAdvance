@@ -7,6 +7,7 @@
 
 using namespace Astralbrew::World;
 using namespace Astralbrew;
+using namespace Astralbrew::Objects;
 
 #define LCD_FRAME_SELECT (1 << 4)
 
@@ -36,7 +37,7 @@ private:
 	char* row;
 
 	void display(int x0, int y0, int r0, int r1)
-	{				
+	{						
 		char* gfx = (char*)ROA_map_gfx+2424*(y0+r0)+x0;
 		for(int y=r0;y<r1;y++)
 		{
@@ -51,6 +52,15 @@ private:
 				((short*)vrow)[i] = ((short*)row)[i];
 			gfx+=2424;			
 		}					
+	}
+	
+	void drawBuilding(const Building* building, int x, int y)
+	{		
+		BuildingSprite* bld = new BuildingSprite(building);		
+		bld->update_visual();
+		bld->update_position(nullptr);
+		OamPool::deploy();
+		building->copy_gfx(0,0,building->get_px_width(), building->get_px_height(), BACK, 240, x, y);
 	}
 	
 	void move_steps(int dx, int dy, int r0, int r1, bool update_map_coords=false)
@@ -72,11 +82,7 @@ private:
 			int srcy = y+dy;
 			if(srcy<0 || srcy>=160)
 			{
-				display(map_x,map_y,y,y+1);
-				/*for(int x=0;x<120;x++)
-				{
-					
-				}*/
+				display(map_x,map_y,y,y+1);				
 			}
 			else
 			{
@@ -106,20 +112,24 @@ private:
 	int map_x=0, map_y=0;
 public:
 	virtual void init() override
-	{			
+	{					
+		init_buildings_gfx();
 		row = (char*)(new short[120]);
 		
-		Video::setMode(4);		
+		Video::setMode(4);				
 		Video::bgInit(2, Video::RotS256x256, Video::Pal8bit, 0, 0);
+		Video::bgSetPriority(2,3);
+		
+		Video::objEnable1D();
 		
 		map_x=264;
 		map_y=208;
 		display(map_x,map_y,0,160);		
+		drawBuilding(new Building(BLD_SMALL_PLOT, 24,16, 9,5), 16, 16);
 		flip_page();
 		
-		dmaCopy(ROA_map_pal, BG_PALETTE, ROA_map_pal_len);		
-
-		init_buildings_gfx();
+		dmaCopy(ROA_map_pal, BG_PALETTE, ROA_map_pal_len);			
+		dmaCopy(ROA_map_pal, SPRITE_PALETTE, ROA_map_pal_len);			
 	}	
 	
 	int frame_cnt = 0;

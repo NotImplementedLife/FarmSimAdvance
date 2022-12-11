@@ -22,9 +22,35 @@ private:
 	int px_width, px_height;
 	int rows_count, cols_count;	
 public:
+	Building(const short* res_gfx, int px_width, int px_height, int rows_count, int cols_count);	
+	
+	const short* get_res_gfx() const;
+	
+	int get_px_width() const;
+	int get_px_height() const;
+	
+	int get_rows_count() const;
+	int get_cols_count() const;
+		
+	void copy_gfx(int src_x, int src_y, int src_width, int src_height, void* dest, int dest_stride, int dest_x, int dest_y, bool as_tiles=false) const;
 	
 	
 	virtual ~Building() = default;
+};
+
+
+#include <Astralbrew>
+
+class BuildingSprite : public Astralbrew::Entity::Sprite
+{
+private:	
+	Astralbrew::Memory::Address vram_addr;
+	const Building* building;
+	Sprite* auxiliary[3] = {nullptr, nullptr, nullptr};
+	Astralbrew::Memory::Address aux_vram[3];
 	
+public:
+	BuildingSprite(const Building* building);
 	
+	~BuildingSprite();
 };
