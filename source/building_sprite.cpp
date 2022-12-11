@@ -5,6 +5,7 @@ using namespace Astralbrew::Objects;
 
 BuildingSprite::BuildingSprite(const Building* building) : Sprite(ObjSize::SIZE_64x64, ObjBitDepth::_8bit, 1)
 {
+	this->building=building;
 	int w = building->get_px_width();
 	int h = building->get_px_height();
 		
@@ -88,6 +89,9 @@ void BuildingSprite::update(const Astralbrew::World::Camera* camera)
 		auxiliary[i]->update_visual();
 	}
 }
+
+int BuildingSprite::px_width() const { return building->get_px_width(); }
+int BuildingSprite::px_height() const { return building->get_px_height(); }
 
 
 BuildingSprite::~BuildingSprite()

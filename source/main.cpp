@@ -124,8 +124,10 @@ public:
 		map_x=264;
 		map_y=208;
 		display(map_x,map_y,0,160);		
-		//drawBuilding(new Building(BLD_MEDIUM_PLOT), 16, 16);
-		drawBuilding(new Building(BLD_CHICKEN_COOP), 16, 16);
+
+		//building_sprite = new BuildingSprite(new Building(BLD_CHICKEN_COOP));
+		building_sprite = new BuildingSprite(new Building(BLD_SMALL_PLOT));
+		building_sprite->set_position(120,80);
 		flip_page();
 		
 		dmaCopy(ROA_map_pal, BG_PALETTE, ROA_map_pal_len);			
@@ -133,6 +135,30 @@ public:
 	}	
 	
 	int frame_cnt = 0;
+	
+	BuildingSprite* building_sprite = nullptr;
+	
+	void adjust_building_sprite_pos()
+	{		
+		assert(building_sprite!=nullptr);
+		int bx = map_x + 120 - building_sprite->px_width()/2;
+		int by = map_y + 80 - building_sprite->px_height()/2;
+		
+		int r = (by/8+bx/12)/2;
+		int c = (by/8-bx/12)/2;
+		
+		int rr = r+c;
+		int cc = (r-c)/2;
+		
+		bx = cc*24 + (rr&1)*12;
+		by = (rr/2)*16 + (rr&1)*8;
+		
+		bx = bx - map_x + building_sprite->px_width()/2;		
+		by = by - map_y + building_sprite->px_height()/2;	
+		
+		
+		building_sprite->set_position(bx,by);
+	}
 	
 	virtual void frame() override
 	{		
@@ -151,10 +177,19 @@ public:
 			{
 				mvx=mvy=0;
 				flip_page();
+				
+				if(building_sprite!=nullptr) 
+				{
+					adjust_building_sprite_pos();
+					building_sprite->update();				
+				}				
+				OamPool::deploy();
 				break;
 			}
 		}						
-		frame_cnt++; frame_cnt&=3;			
+		frame_cnt++; frame_cnt&=3;		
+
+		
 	}
 
 	int dx = 8;
@@ -167,16 +202,20 @@ public:
 	{
 		if(keys & KEY_DOWN) {			
 			mvy=dy;
+			mvx=dx; 			
 		}
 		else if(keys & KEY_UP) {			
 			mvy=-dy;
+			mvx=-dx;			
 		}
-		if(keys & KEY_LEFT) {			
-			mvx=-dx;
+		if(keys & KEY_LEFT) {						
+			mvy=dy;
+			mvx=-dx;			
 		}
 		else if(keys & KEY_RIGHT) {			
 			mvx=dx;
-		}	
+			mvy=-dy;			
+		}			
 	}
 	
 	int metaframe_keys_down = 0;

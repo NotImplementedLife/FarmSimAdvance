@@ -55,5 +55,8 @@ public:
 	
 	void update(const Astralbrew::World::Camera* camera = nullptr);
 	
+	int px_width() const;
+	int px_height() const;
+	
 	~BuildingSprite();
 };
