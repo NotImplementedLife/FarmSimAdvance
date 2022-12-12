@@ -11,30 +11,20 @@ using namespace Astralbrew::Objects;
 
 #define LCD_FRAME_SELECT (1 << 4)
 
+#include "border_48_73_bin.h"
+
 class MainScene : public Scene
-{
-private:
-	MODE5_LINE* BACK = MODE5_BB;		
-	MODE5_LINE* FRONT = MODE5_FB;
+{	
+private:			
+	char* row = (char*)(new short[120]);
 	
-	void flip_page()
-	{		
-		REG_DISPCNT ^= LCD_FRAME_SELECT;
-		if (REG_DISPCNT & LCD_FRAME_SELECT)
-		{
-			BACK = MODE5_FB;			
-			FRONT = MODE5_BB;
-		}
-		else
-		{	
-			BACK = MODE5_BB;
-			FRONT = MODE5_FB;			
-		}		
-	}		
-private:		
-	int scrollX = 0, scrollY = 0;
+	Camera camera = Camera(0,0);
 	
-	char* row;
+	inline static constexpr int cam_left = 264;
+	inline static constexpr int cam_top = 208;
+	inline static constexpr int cam_width = 1136;
+	inline static constexpr int cam_height = 512;	
+	
 
 	void display(int x0, int y0, int r0, int r1)
 	{						
@@ -52,15 +42,12 @@ private:
 				((short*)vrow)[i] = ((short*)row)[i];
 			gfx+=2424;			
 		}					
-	}
+	}	
 	
-	void drawBuilding(const Building* building, int x, int y)
-	{		
-		BuildingSprite* bld = new BuildingSprite(building);		
-		bld->update();
-		OamPool::deploy();
-		building->copy_gfx(0,0,building->get_px_width(), building->get_px_height(), BACK, 240, x, y);
-	}
+	static bool in_range(int x, int a, int b) { return a<=x && x<b; }
+	
+	bool dx0 = false;
+	bool dy0 = false;
 	
 	void move_steps(int dx, int dy, int r0, int r1, bool update_map_coords=false)
 	{
@@ -68,9 +55,28 @@ private:
 		if(dy<0) dy=-6; else if(dy>0) dy=6;		
 		
 		if(update_map_coords)
+		{			
+			if(in_range(camera.get_x()+2*dx, 0, cam_width))
+			{				
+				camera.move(2*dx, 0);
+				map_x+=2*dx;
+				dx0 = false;
+			}
+			else dx = 0, dx0 = true;
+			if(in_range(camera.get_y()+dy,0,cam_height))
+			{
+				camera.move(0, dy);
+				map_y+=dy;
+				dy0 = false;
+			}
+			else dy = 0, dy0 = true;;
+		}
+		else
 		{
-			map_x+=2*dx;
-			map_y+=dy;
+			if(dx0)
+				dx = 0;
+			if(dy0)
+				dy = 0;			
 		}
 		
 		short* src = (short*)FRONT;
@@ -81,12 +87,12 @@ private:
 			int srcy = y+dy;
 			if(srcy<0 || srcy>=160)
 			{
-				display(map_x,map_y,y,y+1);				
+				display(map_x,map_y,y,y+1);
 			}
 			else
 			{
 				for(int x=0;x<120;x++)
-				{			
+				{
 					int srcx = x+dx;
 					if(srcx<0 || srcx>=120)
 					{
@@ -99,21 +105,15 @@ private:
 					}
 				}
 			}
-		}		
-		
-	}		
-	
-	void move_view(int dx, int dy)
-	{
-		
-	}		
+		}
+	}	
 	
 	int map_x=0, map_y=0;
 public:
 	virtual void init() override
 	{					
-		init_buildings_gfx();
-		row = (char*)(new short[120]);
+		init_buildings_gfx();	
+		init_map_metadata();
 		
 		Video::setMode(4);				
 		Video::bgInit(2, Video::RotS256x256, Video::Pal8bit, 0, 0);
@@ -121,17 +121,18 @@ public:
 		
 		Video::objEnable1D();
 		
-		map_x=264;
-		map_y=208;
+		map_x = cam_left-120+camera.get_x();
+		map_y = cam_top -80 +camera.get_y();
 		display(map_x,map_y,0,160);		
 
-		//building_sprite = new BuildingSprite(new Building(BLD_CHICKEN_COOP));
+		
 		building_sprite = new BuildingSprite(new Building(BLD_SMALL_PLOT));
 		building_sprite->set_position(120,80);
 		flip_page();
 		
 		dmaCopy(ROA_map_pal, BG_PALETTE, ROA_map_pal_len);			
-		dmaCopy(ROA_map_pal, SPRITE_PALETTE, ROA_map_pal_len);			
+		dmaCopy(ROA_map_pal, SPRITE_PALETTE, ROA_map_pal_len);		
+		SPRITE_PALETTE[0xBF] = Drawing::Colors::Red;
 	}	
 	
 	int frame_cnt = 0;
@@ -148,16 +149,20 @@ public:
 		int c = (by/8-bx/12)/2;
 		
 		int rr = r+c;
-		int cc = (r-c)/2;
+		int cc = (r-c)/2;		
+		
+		// FATAL_ERROR(sf24(cc).to_string());
 		
 		bx = cc*24 + (rr&1)*12;
 		by = (rr/2)*16 + (rr&1)*8;
 		
 		bx = bx - map_x + building_sprite->px_width()/2;		
-		by = by - map_y + building_sprite->px_height()/2;	
-		
+		by = by - map_y + building_sprite->px_height()/2;				
 		
 		building_sprite->set_position(bx,by);
+		
+		bool valid = building_sprite->get_building()->can_be_placed_on(map_metadata, 48, rr-26, cc-11);
+		building_sprite->set_placement_validity(valid);
 	}
 	
 	virtual void frame() override
@@ -190,10 +195,7 @@ public:
 		frame_cnt++; frame_cnt&=3;		
 
 		
-	}
-
-	int dx = 8;
-	int dy = 6;
+	}	
 	
 	int mvx = 0;
 	int mvy = 0;
@@ -201,20 +203,20 @@ public:
 	void process_movement(int keys)
 	{
 		if(keys & KEY_DOWN) {			
-			mvy=dy;
-			mvx=dx; 			
+			mvy=1;
+			mvx=1; 			
 		}
 		else if(keys & KEY_UP) {			
-			mvy=-dy;
-			mvx=-dx;			
+			mvy=-1;
+			mvx=-1;			
 		}
 		if(keys & KEY_LEFT) {						
-			mvy=dy;
-			mvx=-dx;			
+			mvy=1;
+			mvx=-1;			
 		}
 		else if(keys & KEY_RIGHT) {			
-			mvx=dx;
-			mvy=-dy;			
+			mvx=1;
+			mvy=-1;			
 		}			
 	}
 	
@@ -244,7 +246,44 @@ public:
 	~MainScene() 
 	{
 		delete[] row;
+		delete[] map_metadata;
 	}
+	
+private:
+	void drawBuilding(const Building* building, int x, int y)
+	{				
+		building->copy_gfx(0,0,building->get_px_width(), building->get_px_height(), BACK, 240, x, y);
+	}
+	
+private:
+	char* map_metadata = new char[73*48];
+
+	void init_map_metadata()
+	{
+		int* src = (int*)border_48_73_bin;
+		int* dst = (int*)map_metadata;
+		for(int i=0;i<73*48/4;i++) *(dst++)=*(src++);
+	}
+	
+	
+private:
+	MODE5_LINE* BACK = MODE5_BB;		
+	MODE5_LINE* FRONT = MODE5_FB;
+	
+	void flip_page()
+	{		
+		REG_DISPCNT ^= LCD_FRAME_SELECT;
+		if (REG_DISPCNT & LCD_FRAME_SELECT)
+		{
+			BACK = MODE5_FB;			
+			FRONT = MODE5_BB;
+		}
+		else
+		{	
+			BACK = MODE5_BB;
+			FRONT = MODE5_FB;			
+		}		
+	}	
 };
 
 astralbrew_launch_with_splash(MainScene);

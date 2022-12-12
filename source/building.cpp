@@ -37,13 +37,14 @@ void init_buildings_gfx()
 }
 
 
-Building::Building(const short* res_gfx, int px_width, int px_height, int rows_count, int cols_count)
+Building::Building(const short* res_gfx, int px_width, int px_height, int rows_count, int cols_count, const char* collision_matrix)
 {
 	this->res_gfx = res_gfx;
 	this->px_width = px_width;
 	this->px_height = px_height;
 	this->rows_count = rows_count;
 	this->cols_count = cols_count;
+	this->collision_matrix = collision_matrix;
 }
 
 Building::Building(const short* res_gfx)
@@ -51,19 +52,19 @@ Building::Building(const short* res_gfx)
 	this->res_gfx = res_gfx;
 	if(res_gfx == BLD_SMALL_PLOT || res_gfx == BLD_SAND_ROAD)
 	{
-		px_width = 24, px_height = 16, rows_count = 1, cols_count = 1; return;
+		px_width = 24, px_height = 16, rows_count = 1, cols_count = 1; collision_matrix=COL_1x1_16; return;
 	}
 	else if(res_gfx == BLD_MEDIUM_PLOT)	
 	{
-		px_width = 72, px_height = 32, rows_count = 3, cols_count = 3; return;
+		px_width = 72, px_height = 32, rows_count = 3, cols_count = 3; collision_matrix=COL_2x2_32; return;
 	}
 	else if(res_gfx == BLD_LARGE_PLOT)	
 	{
-		px_width = 72, px_height = 48, rows_count = 5, cols_count = 3; return;
+		px_width = 72, px_height = 48, rows_count = 5, cols_count = 3; collision_matrix=COL_3x3_48; return;
 	}	
 	else if(res_gfx == BLD_CHICKEN_COOP)	
 	{
-		px_width = 120, px_height = 80, rows_count = 9, cols_count = 5; return;
+		px_width = 120, px_height = 80, rows_count = 9, cols_count = 5; collision_matrix=COL_4x4_80; return;
 	}
 	else
 	{
@@ -79,10 +80,12 @@ int Building::get_px_height() const {return px_height;}
 int Building::get_rows_count() const {return rows_count;}
 int Building::get_cols_count() const {return cols_count;}
 
+const char* Building::get_collision_matrix() const { return collision_matrix;}
+
 using namespace Astralbrew;
 
 
-void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, void* dest, int dest_stride, int dest_x, int dest_y, bool as_tiles) const
+void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, void* dest, int dest_stride, int dest_x, int dest_y, bool as_tiles, bool valid) const
 {
 	assert(src_x%2==0);
 	assert(src_width%2==0);
@@ -102,9 +105,16 @@ void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, voi
 		for(int ix=0;ix<w/2;ix++)
 		{
 			short t =dst[ix];
-			short s = *(src++);
+			short s = *(src++);			
+			
+			if(!valid && (iy&1))
+			{
+				if((s&0x00FF)!=0) s = (s&0xFF00)|0x00BF;
+				if((s&0xFF00)!=0) s = (s&0x00FF)|0xBF00;
+			}
+			
 			if((s&0x00FF)!=0) t = (t&0xFF00)|(s&0x00FF);
-			if((s&0xFF00)!=0) t = (t&0x00FF)|(s&0xFF00);				
+			if((s&0xFF00)!=0) t = (t&0x00FF)|(s&0xFF00);							
 			dst[ix]=t;
 		}
 		src = src-w/2+px_width/2;
@@ -156,4 +166,23 @@ void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, voi
 		
 		delete[] perm;
 	}
+}
+
+bool Building::can_be_placed_on(const char* map, int stride, int row, int col) const
+{
+	bool row_shift = (row % 2 == 1);
+	
+	const char* tl = map+row*stride+col;	
+	const char* cm = collision_matrix;
+	
+	for(int r=0;r<rows_count;r++)
+	{
+		for(int c=0;c<cols_count;c++)
+		{
+			if(*(cm++)!=0 && tl[c+((r&1)&&row_shift)]!=0)
+				return false;
+		}
+		tl+=stride;
+	}			
+	return true;
 }
