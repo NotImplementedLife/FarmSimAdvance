@@ -21,8 +21,7 @@ BuildingSprite::BuildingSprite(const Building* building) : Sprite(ObjSize::SIZE_
 		
 		this->get_visual()->set_frame(0, &vram_addr);
 		this->get_visual()->set_crt_gfx(0);		
-		
-		clear_vram(vram);
+				
 		building->copy_gfx(0, 0, w, h, vram, 64, (64-w)/2, (64-h)/2, BLD_TILES | invalid_placement);
 	}
 	else if(w<=128 && h<=64)
@@ -146,10 +145,25 @@ int BuildingSprite::px_height() const { return building->get_px_height(); }
 
 bool BuildingSprite::is_valid_placed() const { return !invalid_placement; }
 
+void BuildingSprite::wipe_vram()
+{
+	const int zero = 0;
+	short* vram = (short*)0x06014000;
+	for(int i=0;i<0x3400/2;i++) 
+	{		
+		__asm("STRH %[_0], [%[dest_map]]"				
+				:
+				: [dest_map] "r" (vram), [_0] "r" (zero));    
+		vram++;
+	}
+	
+}
+
 BuildingSprite::~BuildingSprite()
 {
 	for(int i=0;i<3;i++)
 		delete auxiliary[i];
 	if(auto_clean)
 		delete building;	
+	wipe_vram();
 }

@@ -110,8 +110,7 @@ private:
 	}	
 	
 	int map_x=0, map_y=0;
-public:
-	IconSprite* icons[4] = {nullptr, nullptr, nullptr, nullptr};
+public:	
 	
 	virtual void init() override
 	{					
@@ -135,6 +134,7 @@ public:
 		SPRITE_PALETTE[0xBF] = Drawing::Colors::Red;
 		
 		IconSprite::init_gfx();			
+				
 	}	
 	
 	int frame_cnt = 0;	
@@ -165,7 +165,7 @@ public:
 		building_sprite->set_position(bx,by);
 		
 		bool valid = building_sprite->get_building()->can_be_placed_on(map_metadata, 48, rr-26, cc-11);
-		building_sprite->set_placement_validity(valid);
+		building_sprite->set_placement_validity(valid);			
 	}
 	
 	virtual void frame() override
@@ -182,7 +182,7 @@ public:
 				move_steps(mvx,mvy, 120, 160);
 				break;
 			case 3:	
-			{
+			{				
 				mvx=mvy=0;
 				flip_page();
 				
@@ -242,7 +242,10 @@ public:
 				if(process_movement(keys))
 					break;
 				else if(keys & KEY_L)
-					building_place_start(new Building(BLD_CHICKEN_COOP));
+				{
+					launch_menu(IconSprite::MENU_BUILDING);
+					//building_place_start(new Building(BLD_CHICKEN_COOP));
+				}
 				break;
 			case MODE_PLACE_BUILDING:
 				if(process_movement(keys))
@@ -254,6 +257,24 @@ public:
 				else if(keys & KEY_B)
 				{
 					building_place_cancel();
+				}
+				break;
+			case MODE_MENU:
+				if(keys & KEY_RIGHT)
+				{
+					menu_right();
+				}
+				else if(keys & KEY_LEFT)
+				{
+					menu_left();
+				}
+				else if(keys & KEY_B)
+				{
+					menu_cancel();
+				}
+				else if(keys & KEY_A)
+				{
+					menu_select();
 				}
 				break;
 		}		
@@ -298,7 +319,7 @@ public:
 	~MainScene() 
 	{
 		delete[] row;
-		delete[] map_metadata;
+		delete[] map_metadata;		
 	}
 	
 private:
@@ -317,6 +338,64 @@ private:
 		for(int i=0;i<73*48/4;i++) *(dst++)=*(src++);
 	}
 	
+private:	
+	IconSprite* icons[4] = {nullptr, nullptr, nullptr, nullptr};
+	
+	int crt_icon_id = 0;
+	
+	int menu_type;
+
+	void launch_menu(int menu_type)
+	{
+		this->menu_type = menu_type;
+		IconSprite::init_gfx(menu_type);
+		for(int i=0;i<4;i++)
+		{
+			icons[i] = new IconSprite(i);
+		}
+		crt_icon_id = 0;
+		schedule_task(&menu_move_task);
+		
+		set_mode(MODE_MENU);
+	}
+	
+	void menu_left()
+	{
+		if(crt_icon_id==0) return;
+		crt_icon_id--;
+		menu_move_task.to_right();
+	}
+	
+	void menu_right()
+	{
+		if(crt_icon_id==3) return;
+		crt_icon_id++;
+		menu_move_task.to_left();
+	}
+	
+	void menu_cancel()
+	{
+		unschedule_task(&menu_move_task);
+		menu_move_task.set_counter(-1);
+				
+		for(int i=0;i<4;i++)
+		{
+			delete icons[i];
+			icons[i] = nullptr;
+		}		
+		set_mode(MODE_SELECT);
+	}
+	
+	inline static constexpr short* menu_opt_bld[4] = { BLD_SMALL_PLOT, BLD_MEDIUM_PLOT, BLD_LARGE_PLOT, BLD_CHICKEN_COOP };
+	
+	void menu_select()
+	{
+		if(menu_type == IconSprite::MENU_BUILDING)
+		{			
+			menu_cancel();
+			building_place_start(new Building(menu_opt_bld[crt_icon_id]));
+		}
+	}
 private:
 	void building_place_start(const Building* building)
 	{
@@ -347,6 +426,20 @@ private:
 	
 	inline static constexpr int MODE_SELECT = 0;
 	inline static constexpr int MODE_PLACE_BUILDING = 1;
+	inline static constexpr int MODE_MENU = 2;
+	
+	int bak_mode;
+	void suspend_mode()
+	{
+		bak_mode = mode;
+		mode = -1;
+	}
+	
+	void restore_mode()
+	{
+		mode = bak_mode;
+	}
+	
 	
 	void set_mode(int _mode)
 	{
@@ -372,6 +465,33 @@ private:
 			FRONT = MODE5_FB;			
 		}		
 	}	
+private:
+
+	class MenuOptionMoveTask : public ScheduledTask
+	{		
+	public:
+		MainScene* scene = nullptr;
+		int direction = 1;
+		MenuOptionMoveTask(MainScene* scene) : ScheduledTask(1,-1), scene(scene) { }		
+		
+		void to_left() { direction = -2; set_counter(20); scene->suspend_mode(); }
+		void to_right() { direction = 2; set_counter(20); scene->suspend_mode(); }
+		
+		void action() override
+		{
+			for(int i=0;i<4;i++)
+			{
+				scene->icons[i]->set_position(scene->icons[i]->pos_x()+direction, scene->icons[i]->pos_y());
+			}
+			if(get_counter()==1) 
+			{
+				scene->restore_mode();				
+			}
+		}
+				
+	};
+	
+	MenuOptionMoveTask menu_move_task = MenuOptionMoveTask(this);
 };
 
 astralbrew_launch_with_splash(MainScene);

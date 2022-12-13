@@ -76,5 +76,7 @@ public:
 	int px_width() const;
 	int px_height() const;
 	
+	static void wipe_vram();
+	
 	~BuildingSprite();
 };
