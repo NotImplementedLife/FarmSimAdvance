@@ -126,7 +126,7 @@ public:
 		display(map_x,map_y,0,160);		
 
 		
-		building_sprite = new BuildingSprite(new Building(BLD_LARGE_PLOT));
+		building_sprite = new BuildingSprite(new Building(BLD_CHICKEN_COOP));
 		building_sprite->set_position(120,80);
 		flip_page();
 		
@@ -137,7 +137,9 @@ public:
 	
 	int frame_cnt = 0;
 	
-	BuildingSprite* building_sprite = nullptr;
+	
+	
+	BuildingSprite* building_sprite = nullptr;	
 	
 	void adjust_building_sprite_pos()
 	{		

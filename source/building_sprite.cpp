@@ -13,7 +13,7 @@ BuildingSprite::BuildingSprite(const Building* building) : Sprite(ObjSize::SIZE_
 	vram_addr.set_value(vram);
 	
 	get_attribute()->set_priority(0);
-	set_position(120,80);
+	set_position(120,80);	
 	
 	if(w<=64 && h<=64)
 	{						
@@ -43,31 +43,36 @@ BuildingSprite::BuildingSprite(const Building* building) : Sprite(ObjSize::SIZE_
 	else if(w<=64 && h<=128) FATAL_ERROR("Vertical rect not supported");
 	else if(w<=128 && h<=128)
 	{
+		int opth = ((128-h)/2)/8;		
+		opth = 8*opth*32;
+		
 		this->set_anchor(0,0);
 		this->get_visual()->set_frame(0, &vram_addr);
 		this->get_visual()->set_crt_gfx(0);				
-		building->copy_gfx(w/2, h/2, w/2, h/2, vram, 64, 0, 0, BLD_TILES | invalid_placement);
+		building->copy_gfx(w/2, h/2, w/2, h/2, vram, 64, 0, 0, BLD_TILES | invalid_placement);		
 		
 		auxiliary[0] = new Sprite(ObjSize::SIZE_64x64, ObjBitDepth::_8bit, 1);
-		aux_vram[0].set_value(vram+64*64/2);
-		auxiliary[0]->set_anchor(255,0);
+		aux_vram[0].set_value(vram + 64*64/sizeof(short) - opth);
+		auxiliary[0]->set_anchor(0,255);
 		auxiliary[0]->get_visual()->set_frame(0, &aux_vram[0]);
 		auxiliary[0]->get_visual()->set_crt_gfx(0);		
-		building->copy_gfx(0, h/2, w/2, h/2, aux_vram[0].get_value(), 64, 64-w/2, 0, BLD_TILES | invalid_placement);
+		building->copy_gfx(w/2, 0, w/2, h/2, aux_vram[0].get_value(), 64, 0, 64-h/2, BLD_TILES | invalid_placement);				
 		
 		auxiliary[1] = new Sprite(ObjSize::SIZE_64x64, ObjBitDepth::_8bit, 1);
-		aux_vram[1].set_value(vram+2*64*64/2);
-		auxiliary[1]->set_anchor(0,255);
+		aux_vram[1].set_value(vram+2*64*64/sizeof(short) - opth);
+		auxiliary[1]->set_anchor(255,0);
 		auxiliary[1]->get_visual()->set_frame(0, &aux_vram[1]);
 		auxiliary[1]->get_visual()->set_crt_gfx(0);		
-		building->copy_gfx(w/2, 0, w/2, h/2, aux_vram[1].get_value(), 64, 0, 64-h/2, BLD_TILES | invalid_placement);
+		building->copy_gfx(0, h/2, w/2, h/2, aux_vram[1].get_value(), 64, 64-w/2, 0, BLD_TILES | invalid_placement);
+				
 		
 		auxiliary[2] = new Sprite(ObjSize::SIZE_64x64, ObjBitDepth::_8bit, 1);
-		aux_vram[2].set_value(vram+3*64*64/2);
+		aux_vram[2].set_value(vram+3*64*64/sizeof(short) - 2*opth);
 		auxiliary[2]->set_anchor(255,255);
 		auxiliary[2]->get_visual()->set_frame(0, &aux_vram[2]);
 		auxiliary[2]->get_visual()->set_crt_gfx(0);		
 		building->copy_gfx(0, 0, w/2, h/2, aux_vram[2].get_value(), 64, 64-w/2, 64-h/2, BLD_TILES | invalid_placement);
+				
 	}
 }
 
@@ -100,9 +105,9 @@ void BuildingSprite::draw_vram() const
 	}
 	else if(w<=128 && h<=128)
 	{			
-		building->copy_gfx(w/2, h/2, w/2, h/2, vram_addr.get_value(), 64, 0, 0, BLD_TILES | invalid_placement);		
-		building->copy_gfx(0, h/2, w/2, h/2, aux_vram[0].get_value(), 64, 64-w/2, 0, BLD_TILES | invalid_placement);		
-		building->copy_gfx(w/2, 0, w/2, h/2, aux_vram[1].get_value(), 64, 0, 64-h/2, BLD_TILES | invalid_placement);	
+		building->copy_gfx(w/2, h/2, w/2, h/2, vram_addr.get_value(), 64, 0, 0, BLD_TILES | invalid_placement);
+		building->copy_gfx(w/2, 0, w/2, h/2, aux_vram[0].get_value(), 64, 0, 64-h/2, BLD_TILES | invalid_placement);	
+		building->copy_gfx(0, h/2, w/2, h/2, aux_vram[1].get_value(), 64, 64-w/2, 0, BLD_TILES | invalid_placement);
 		building->copy_gfx(0, 0, w/2, h/2, aux_vram[2].get_value(), 64, 64-w/2, 64-h/2, BLD_TILES | invalid_placement);
 	}
 }
