@@ -144,10 +144,12 @@ void BuildingSprite::update(const Astralbrew::World::Camera* camera)
 int BuildingSprite::px_width() const { return building->get_px_width(); }
 int BuildingSprite::px_height() const { return building->get_px_height(); }
 
+bool BuildingSprite::is_valid_placed() const { return !invalid_placement; }
 
 BuildingSprite::~BuildingSprite()
 {
 	for(int i=0;i<3;i++)
 		delete auxiliary[i];
-	
+	if(auto_clean)
+		delete building;	
 }

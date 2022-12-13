@@ -124,20 +124,15 @@ public:
 		map_x = cam_left-120+camera.get_x();
 		map_y = cam_top -80 +camera.get_y();
 		display(map_x,map_y,0,160);		
-
 		
-		building_sprite = new BuildingSprite(new Building(BLD_CHICKEN_COOP));
-		building_sprite->set_position(120,80);
 		flip_page();
 		
 		dmaCopy(ROA_map_pal, BG_PALETTE, ROA_map_pal_len);			
-		dmaCopy(ROA_map_pal, SPRITE_PALETTE, ROA_map_pal_len);		
+		dmaCopy(ROA_map_pal, SPRITE_PALETTE, ROA_map_pal_len);
 		SPRITE_PALETTE[0xBF] = Drawing::Colors::Red;
 	}	
 	
-	int frame_cnt = 0;
-	
-	
+	int frame_cnt = 0;	
 	
 	BuildingSprite* building_sprite = nullptr;	
 	
@@ -195,31 +190,72 @@ public:
 			}
 		}						
 		frame_cnt++; frame_cnt&=3;		
-
-		
 	}	
 	
 	int mvx = 0;
 	int mvy = 0;
 	
-	void process_movement(int keys)
+	bool process_movement(int keys)
 	{
 		if(keys & KEY_DOWN) {			
 			mvy=1;
 			mvx=1; 			
+			return true;
 		}
 		else if(keys & KEY_UP) {			
 			mvy=-1;
-			mvx=-1;			
+			mvx=-1;		
+			return true;
 		}
 		if(keys & KEY_LEFT) {						
 			mvy=1;
-			mvx=-1;			
+			mvx=-1;		
+			return true;
 		}
 		else if(keys & KEY_RIGHT) {			
 			mvx=1;
-			mvy=-1;			
+			mvy=-1;		
+			return true;
 		}			
+		return false;
+	}	
+	
+	void process_keys_down(int keys)
+	{
+		switch(mode)
+		{
+			case MODE_SELECT:
+				if(process_movement(keys))
+					break;
+				else if(keys & KEY_L)
+					building_place_start(new Building(BLD_CHICKEN_COOP));
+				break;
+			case MODE_PLACE_BUILDING:
+				if(process_movement(keys))
+					break;
+				else if(keys & KEY_A)
+				{
+					building_place_confirm();
+				}
+				else if(keys & KEY_B)
+				{
+					building_place_cancel();
+				}
+				break;
+		}		
+	}
+	
+	void process_keys_held(int keys)
+	{
+		switch(mode)
+		{
+			case MODE_SELECT:
+				if(process_movement(keys))
+					break;
+			case MODE_PLACE_BUILDING:
+				if(process_movement(keys))
+					break;
+		}		
 	}
 	
 	int metaframe_keys_down = 0;
@@ -230,7 +266,7 @@ public:
 		metaframe_keys_down |= keys;
 		if(frame_cnt==0)
 		{
-			process_movement(metaframe_keys_down);
+			process_keys_down(metaframe_keys_down);
 			metaframe_keys_down=0;
 		}
 	}
@@ -240,7 +276,7 @@ public:
 		metaframe_keys_held |= keys;
 		if(frame_cnt==0)
 		{
-			process_movement(metaframe_keys_held);
+			process_keys_held(metaframe_keys_held);
 			metaframe_keys_held=0;
 		}
 	}
@@ -252,10 +288,10 @@ public:
 	}
 	
 private:
-	void drawBuilding(const Building* building, int x, int y)
+	/*void drawBuilding(const Building* building, int x, int y)
 	{				
 		building->copy_gfx(0,0,building->get_px_width(), building->get_px_height(), BACK, 240, x, y);
-	}
+	}*/
 	
 private:
 	char* map_metadata = new char[73*48];
@@ -265,6 +301,40 @@ private:
 		int* src = (int*)border_48_73_bin;
 		int* dst = (int*)map_metadata;
 		for(int i=0;i<73*48/4;i++) *(dst++)=*(src++);
+	}
+	
+private:
+	void building_place_start(const Building* building)
+	{
+		building_sprite = new BuildingSprite(building);
+		building_sprite->set_position(120,80);
+		set_mode(MODE_PLACE_BUILDING);
+	}
+	
+	void building_place_confirm()
+	{
+		if(!building_sprite->is_valid_placed()) 
+			return;
+		
+		building_place_cancel();		
+	}
+	
+	void building_place_cancel()
+	{
+		delete building_sprite;
+		building_sprite = nullptr;
+		set_mode(MODE_SELECT);
+	}
+	
+private:
+	int mode = MODE_SELECT;
+	
+	inline static constexpr int MODE_SELECT = 0;
+	inline static constexpr int MODE_PLACE_BUILDING = 1;
+	
+	void set_mode(int _mode)
+	{
+		mode = _mode;
 	}
 	
 	
