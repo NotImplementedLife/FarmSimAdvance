@@ -85,7 +85,7 @@ const char* Building::get_collision_matrix() const { return collision_matrix;}
 using namespace Astralbrew;
 
 
-void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, void* dest, int dest_stride, int dest_x, int dest_y, bool as_tiles, bool valid) const
+void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, void* dest, int dest_stride, int dest_x, int dest_y, int flags) const
 {
 	assert(src_x%2==0);
 	assert(src_width%2==0);
@@ -94,6 +94,9 @@ void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, voi
 	assert(src_y+src_height<=px_height);	
 	assert(dest_x + src_width <= dest_stride);
 	assert(dest_x%2==0);	
+	
+	bool as_tiles = flags & BLD_TILES;
+	bool invalid = flags & BLD_INVALID;
 	
 	int w = min(src_width, dest_stride);	
 	short* dst = (short*)((int)dest + dest_y*dest_stride+dest_x);
@@ -108,7 +111,7 @@ void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, voi
 				short t =dst[ix];
 				short s = *(src++);			
 							
-				if(!valid && (iy&1))
+				if(invalid && (iy&1))
 				{
 					if((s&0x00FF)!=0) s = (s&0xFF00)|0x00BF;
 					if((s&0xFF00)!=0) s = (s&0x00FF)|0xBF00;
@@ -124,7 +127,7 @@ void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, voi
 	else //if(as_tiles)
 	{		
 		for(int iy=0;iy<src_height;iy++)
-		{			
+		{
 			for(int ix=0;ix<w/2;ix++)
 			{
 				int y = dest_y + iy;
@@ -137,10 +140,10 @@ void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, voi
 				
 				short* val = &(((short*)dest)[(tstride*ty+tx)*32 + 4*y + x/2]);
 				
-				short t =*val;
+				short t = *val;
 				short s = *(src++);			
-							
-				if(!valid && (iy&1))
+				
+				if(invalid && (iy&1))
 				{
 					if((s&0x00FF)!=0) s = (s&0xFF00)|0x00BF;
 					if((s&0xFF00)!=0) s = (s&0x00FF)|0xBF00;

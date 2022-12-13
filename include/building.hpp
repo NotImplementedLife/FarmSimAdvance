@@ -35,8 +35,13 @@ public:
 	int get_cols_count() const;
 	
 	const char* get_collision_matrix() const;
+	
+	#define BLD_VALID (0<<0)
+	#define BLD_INVALID (1<<0)
+	#define BLD_BITMAP (0<<1)
+	#define BLD_TILES (1<<1)	
 		
-	void copy_gfx(int src_x, int src_y, int src_width, int src_height, void* dest, int dest_stride, int dest_x, int dest_y, bool as_tiles=false, bool valid=true) const;
+	void copy_gfx(int src_x, int src_y, int src_width, int src_height, void* dest, int dest_stride, int dest_x, int dest_y, int flags = BLD_BITMAP | BLD_VALID) const;
 	
 	bool can_be_placed_on(const char* map, int stride, int row, int col) const;	
 	
@@ -53,7 +58,7 @@ private:
 	const Building* building;
 	Sprite* auxiliary[3] = {nullptr, nullptr, nullptr};
 	Astralbrew::Memory::Address aux_vram[3];	
-	bool valid_placement = false;
+	bool invalid_placement = false;
 	void draw_vram() const;
 	void clear_vram(void* addr) const;
 public:
