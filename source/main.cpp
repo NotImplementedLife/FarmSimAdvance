@@ -126,7 +126,7 @@ public:
 		display(map_x,map_y,0,160);		
 
 		
-		building_sprite = new BuildingSprite(new Building(BLD_SMALL_PLOT));
+		building_sprite = new BuildingSprite(new Building(BLD_LARGE_PLOT));
 		building_sprite->set_position(120,80);
 		flip_page();
 		

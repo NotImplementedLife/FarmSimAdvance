@@ -93,78 +93,65 @@ void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, voi
 	assert(src_x+src_width<=px_width);
 	assert(src_y+src_height<=px_height);	
 	assert(dest_x + src_width <= dest_stride);
-	assert(dest_x%2==0);
+	assert(dest_x%2==0);	
 	
 	int w = min(src_width, dest_stride);	
 	short* dst = (short*)((int)dest + dest_y*dest_stride+dest_x);
 	const short* src = (const short*)((int)res_gfx + px_width*src_y + src_x);
 	
-	
-	for(int iy=0;iy<src_height;iy++)
+	if(!as_tiles)
 	{
-		for(int ix=0;ix<w/2;ix++)
+		for(int iy=0;iy<src_height;iy++)
 		{
-			short t =dst[ix];
-			short s = *(src++);			
-			
-			if(!valid && (iy&1))
+			for(int ix=0;ix<w/2;ix++)
 			{
-				if((s&0x00FF)!=0) s = (s&0xFF00)|0x00BF;
-				if((s&0xFF00)!=0) s = (s&0x00FF)|0xBF00;
+				short t =dst[ix];
+				short s = *(src++);			
+							
+				if(!valid && (iy&1))
+				{
+					if((s&0x00FF)!=0) s = (s&0xFF00)|0x00BF;
+					if((s&0xFF00)!=0) s = (s&0x00FF)|0xBF00;
+				}						
+				if((s&0x00FF)!=0) t = (t&0xFF00)|(s&0x00FF);
+				if((s&0xFF00)!=0) t = (t&0x00FF)|(s&0xFF00);										
+				dst[ix]=t;
 			}
-			
-			if((s&0x00FF)!=0) t = (t&0xFF00)|(s&0x00FF);
-			if((s&0xFF00)!=0) t = (t&0x00FF)|(s&0xFF00);							
-			dst[ix]=t;
-		}
-		src = src-w/2+px_width/2;
-		dst+=dest_stride/2;
-	}
-	
-	if(as_tiles)
-	{
-		int tmp[2];
-		int* buf = (int*)dest;
-		const int c = dest_stride/8;
-		const int r = 8;
-		
-		short* perm = new short[r*c];
-		for(int i=0;i<r*c-1;i++)
-			perm[i] = c*i%(r*c-1);
-		perm[r*c-1] = r*c-1;		
-		
-		int ny = (dest_y + src_height+7)/8;
-		for(int k=0;k<ny;k++)
+			src = src-w/2+px_width/2;
+			dst+=dest_stride/2;
+		}	
+	}	
+	else //if(as_tiles)
+	{		
+		for(int iy=0;iy<src_height;iy++)
 		{			
-			for(int i=0;i<r*c-1;i++) perm[i]&=0x7fff;
-			
-			for(int i=0;i<r*c-1;i++)
+			for(int ix=0;ix<w/2;ix++)
 			{
-				if(perm[i]&0x8000) continue;		
-				perm[i]|=0x8000;
+				int y = dest_y + iy;
+				int x = dest_x + 2*ix;
+				int ty = y/8;
+				int tx = x/8;
+				x %= 8;
+				y %= 8;
+				int tstride = dest_stride/8;
 				
-				tmp[0] = buf[2*i], tmp[1] = buf[2*i+1];	// tmp = at(i)
-				int j=i, next;			
-				do
-				{		
-					next = perm[j]&0x7fff;
-					if(next==i) 
-					{
-						buf[2*j]=tmp[0], buf[2*j+1]=tmp[1]; //at(j)=tmp
-					}
-					else 
-					{
-						buf[2*j]=buf[2*next], buf[2*j+1]=buf[2*next+1]; //at(j) = at(perm(j))
-					}
-					
-					perm[j]|=0x8000;
-				}
-				while((j = next)!=i);							
-			}	
-			buf += 2*(r*c);
-		}		
-		
-		delete[] perm;
+				short* val = &(((short*)dest)[(tstride*ty+tx)*32 + 4*y + x/2]);
+				
+				short t =*val;
+				short s = *(src++);			
+							
+				if(!valid && (iy&1))
+				{
+					if((s&0x00FF)!=0) s = (s&0xFF00)|0x00BF;
+					if((s&0xFF00)!=0) s = (s&0x00FF)|0xBF00;
+				}						
+				if((s&0x00FF)!=0) t = (t&0xFF00)|(s&0x00FF);
+				if((s&0xFF00)!=0) t = (t&0x00FF)|(s&0xFF00);										
+				*val=t;
+			}
+			src = src-w/2+px_width/2;
+			dst+=dest_stride/2;
+		}			
 	}
 }
 

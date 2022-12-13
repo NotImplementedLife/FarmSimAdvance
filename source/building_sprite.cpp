@@ -22,6 +22,7 @@ BuildingSprite::BuildingSprite(const Building* building) : Sprite(ObjSize::SIZE_
 		this->get_visual()->set_frame(0, &vram_addr);
 		this->get_visual()->set_crt_gfx(0);		
 		
+		clear_vram(vram);
 		building->copy_gfx(0, 0, w, h, vram, 64, (64-w)/2, (64-h)/2, true, valid_placement);
 	}
 	else if(w<=128 && h<=64)
@@ -70,30 +71,52 @@ BuildingSprite::BuildingSprite(const Building* building) : Sprite(ObjSize::SIZE_
 	}
 }
 
+void BuildingSprite::clear_vram(void* addr) const
+{	
+	short* dest = (short*)addr;	
+	for(int i=0;i<64*64/2;i++)
+		asm volatile(
+			"\n PUSH {r0, r1}"				
+			"\n MOV r1, %0"
+			"\n MOV r0, %1"
+			"\n STRH r0, [r1]"
+			"\n POP {r0, r1}"
+				:
+				: "r" (dest+i), "r" (0));
+}
+
 void BuildingSprite::draw_vram() const
 {
 	int w = building->get_px_width();
 	int h = building->get_px_height();
 	if(w<=64 && h<=64)
 	{
+		clear_vram(vram_addr.get_value());
 		building->copy_gfx(0, 0, w, h, vram_addr.get_value(), 64, (64-w)/2, (64-h)/2, true, valid_placement);
 	}
 	else if(w<=128 && h<=64)
 	{	
+		clear_vram(vram_addr.get_value());		
 		building->copy_gfx(w/2, 0, w/2, h, vram_addr.get_value(), 64, 0, (64-h)/2, true, valid_placement);
+		clear_vram(aux_vram[0].get_value());
 		building->copy_gfx(0, 0, w/2, h, aux_vram[0].get_value(), 64, 64-w/2, (64-h)/2, true, valid_placement);
 	}
 	else if(w<=128 && h<=128)
 	{	
+		clear_vram(vram_addr.get_value());						
 		building->copy_gfx(w/2, h/2, w/2, h/2, vram_addr.get_value(), 64, 0, 0, true, valid_placement);
+		clear_vram(aux_vram[0].get_value());
 		building->copy_gfx(0, h/2, w/2, h/2, aux_vram[0].get_value(), 64, 64-w/2, 0, true, valid_placement);
+		clear_vram(aux_vram[1].get_value());
 		building->copy_gfx(w/2, 0, w/2, h/2, aux_vram[1].get_value(), 64, 0, 64-h/2, true, valid_placement);
+		clear_vram(aux_vram[2].get_value());
 		building->copy_gfx(0, 0, w/2, h/2, aux_vram[2].get_value(), 64, 64-w/2, 64-h/2, true, valid_placement);
 	}	
 }
 
 void BuildingSprite::set_placement_validity(bool valid)
 {
+	if(valid_placement==valid) return;
 	valid_placement = valid;
 	draw_vram();
 }

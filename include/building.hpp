@@ -55,6 +55,7 @@ private:
 	Astralbrew::Memory::Address aux_vram[3];	
 	bool valid_placement = false;
 	void draw_vram() const;
+	void clear_vram(void* addr) const;
 public:
 	BuildingSprite(const Building* building);
 	
