@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "building.hpp"
+#include "icon_sprite.hpp"
 
 using namespace Astralbrew::World;
 using namespace Astralbrew;
@@ -110,6 +111,8 @@ private:
 	
 	int map_x=0, map_y=0;
 public:
+	IconSprite* icons[4] = {nullptr, nullptr, nullptr, nullptr};
+	
 	virtual void init() override
 	{					
 		init_buildings_gfx();	
@@ -130,11 +133,14 @@ public:
 		dmaCopy(ROA_map_pal, BG_PALETTE, ROA_map_pal_len);			
 		dmaCopy(ROA_map_pal, SPRITE_PALETTE, ROA_map_pal_len);
 		SPRITE_PALETTE[0xBF] = Drawing::Colors::Red;
+		
+		IconSprite::init_gfx();			
 	}	
 	
 	int frame_cnt = 0;	
 	
 	BuildingSprite* building_sprite = nullptr;	
+		
 	
 	void adjust_building_sprite_pos()
 	{		
@@ -184,7 +190,15 @@ public:
 				{
 					adjust_building_sprite_pos();
 					building_sprite->update();				
-				}				
+				}								
+				for(int i=0;i<4;i++)
+				{
+					if(icons[i])
+					{
+						icons[i]->update_visual();
+						icons[i]->update_position(nullptr);
+					}
+				}
 				OamPool::deploy();
 				break;
 			}
@@ -316,6 +330,8 @@ private:
 		if(!building_sprite->is_valid_placed()) 
 			return;
 		
+		
+				
 		building_place_cancel();		
 	}
 	

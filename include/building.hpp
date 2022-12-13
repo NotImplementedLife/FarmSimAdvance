@@ -62,6 +62,7 @@ private:
 	void draw_vram() const;
 	void clear_vram(void* addr) const;
 	bool auto_clean = true;
+		
 public:
 	BuildingSprite(const Building* building);
 	
