@@ -43,7 +43,7 @@ public:
 		
 	void copy_gfx(int src_x, int src_y, int src_width, int src_height, void* dest, int dest_stride, int dest_x, int dest_y, int flags = BLD_BITMAP | BLD_VALID) const;
 	
-	bool can_be_placed_on(const char* map, int stride, int row, int col) const;	
+	bool can_be_placed_on(const int* map, int stride, int row, int col) const;	
 	
 	virtual ~Building() = default;
 };
@@ -60,9 +60,7 @@ private:
 	Astralbrew::Memory::Address aux_vram[3];	
 	bool invalid_placement = false;
 	void draw_vram() const;
-	void clear_vram(void* addr) const;
-	bool auto_clean = true;
-		
+	void clear_vram(void* addr) const;			
 public:
 	BuildingSprite(const Building* building);
 	

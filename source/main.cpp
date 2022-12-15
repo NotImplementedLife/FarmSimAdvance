@@ -14,6 +14,8 @@ using namespace Astralbrew::Objects;
 
 #include "border_48_73_bin.h"
 
+#include "metamap.hpp"
+
 class MainScene : public Scene
 {	
 private:			
@@ -42,7 +44,7 @@ private:
 			for(int i=0;i<120;i++)
 				((short*)vrow)[i] = ((short*)row)[i];
 			gfx+=2424;			
-		}					
+		}							
 	}	
 	
 	static bool in_range(int x, int a, int b) { return a<=x && x<b; }
@@ -70,7 +72,7 @@ private:
 				map_y+=dy;
 				dy0 = false;
 			}
-			else dy = 0, dy0 = true;;
+			else dy = 0, dy0 = true;
 		}
 		else
 		{
@@ -88,7 +90,7 @@ private:
 			int srcy = y+dy;
 			if(srcy<0 || srcy>=160)
 			{
-				display(map_x,map_y,y,y+1);
+				display(map_x,map_y,y,y+1);								
 			}
 			else
 			{
@@ -98,7 +100,7 @@ private:
 					if(srcx<0 || srcx>=120)
 					{
 						short* gfx = (short*)((int)ROA_map_gfx+2424*(map_y+y)+map_x+2*x);
-						dst[120*y+x] = gfx[0];
+						dst[120*y+x] = gfx[0];						
 					}
 					else
 					{
@@ -107,6 +109,24 @@ private:
 				}
 			}
 		}
+		
+		if(dy<0 && r0==0)
+		{
+			metamap.draw_buildings(map_x-cam_left, map_y-cam_top, 240, -dy, (short*)BACK, 240);
+		}
+		else if(dy>0 && r1==160)
+		{
+			metamap.draw_buildings(map_x-cam_left, map_y-cam_top+160-dy, 240, dy, ((short*)BACK)+120*(160-dy), 240);
+		}
+		
+		if(dx<0)
+		{
+			metamap.draw_buildings(map_x-cam_left, map_y-cam_top+r0, -2*dx, r1-r0, ((short*)BACK)+120*r0, 240);
+		}
+		else if(dx>0)
+		{
+			metamap.draw_buildings(map_x-cam_left+240-2*dx, map_y-cam_top+r0, 2*dx, r1-r0, ((short*)BACK)+120*r0+120-dx, 240);
+		}
 	}	
 	
 	int map_x=0, map_y=0;
@@ -114,8 +134,7 @@ public:
 	
 	virtual void init() override
 	{					
-		init_buildings_gfx();	
-		init_map_metadata();
+		init_buildings_gfx();			
 		
 		Video::setMode(4);				
 		Video::bgInit(2, Video::RotS256x256, Video::Pal8bit, 0, 0);
@@ -140,7 +159,11 @@ public:
 	int frame_cnt = 0;	
 	
 	BuildingSprite* building_sprite = nullptr;	
-		
+	
+	Metamap metamap;
+	
+	int building_place_r;
+	int building_place_c;
 	
 	void adjust_building_sprite_pos()
 	{		
@@ -161,10 +184,12 @@ public:
 		
 		bx = bx - map_x + building_sprite->px_width()/2;		
 		by = by - map_y + building_sprite->px_height()/2;				
+	
+		building_place_r = rr-26;
+		building_place_c = cc-11;
 		
-		building_sprite->set_position(bx,by);
-		
-		bool valid = building_sprite->get_building()->can_be_placed_on(map_metadata, 48, rr-26, cc-11);
+		building_sprite->set_position(bx,by);		
+		bool valid = metamap.can_place(building_sprite->get_building(), building_place_r, building_place_c);		
 		building_sprite->set_placement_validity(valid);			
 	}
 	
@@ -180,6 +205,11 @@ public:
 				break;
 			case 2:
 				move_steps(mvx,mvy, 120, 160);
+				if(draw_building_scheduled)
+				{
+					metamap.draw_buildings(draw_building_x, draw_building_y, draw_building_w, draw_building_h, (short*)BACK, 240);
+					draw_building_scheduled = false;
+				}
 				break;
 			case 3:	
 			{				
@@ -318,8 +348,7 @@ public:
 	
 	~MainScene() 
 	{
-		delete[] row;
-		delete[] map_metadata;		
+		delete[] row;		
 	}
 	
 private:
@@ -327,16 +356,6 @@ private:
 	{				
 		building->copy_gfx(0,0,building->get_px_width(), building->get_px_height(), BACK, 240, x, y);
 	}*/
-	
-private:
-	char* map_metadata = new char[73*48];
-
-	void init_map_metadata()
-	{
-		int* src = (int*)border_48_73_bin;
-		int* dst = (int*)map_metadata;
-		for(int i=0;i<73*48/4;i++) *(dst++)=*(src++);
-	}
 	
 private:	
 	IconSprite* icons[4] = {nullptr, nullptr, nullptr, nullptr};
@@ -409,10 +428,22 @@ private:
 		if(!building_sprite->is_valid_placed()) 
 			return;
 		
+		metamap.place(building_sprite->get_building(), building_place_r, building_place_c);		
+						
+		draw_building_x = map_x-cam_left;
+		draw_building_y = map_y-cam_top;
+		draw_building_w = 240;
+		draw_building_h = 160;
+		draw_building_scheduled = true;		
 		
-				
 		building_place_cancel();		
 	}
+	
+	bool draw_building_scheduled = false;
+	int draw_building_x;
+	int draw_building_y;
+	int draw_building_w;
+	int draw_building_h;	
 	
 	void building_place_cancel()
 	{
@@ -420,6 +451,9 @@ private:
 		building_sprite = nullptr;
 		set_mode(MODE_SELECT);
 	}
+	
+private:
+	
 	
 private:
 	int mode = MODE_SELECT;

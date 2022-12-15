@@ -75,20 +75,6 @@ BuildingSprite::BuildingSprite(const Building* building) : Sprite(ObjSize::SIZE_
 	}
 }
 
-void BuildingSprite::clear_vram(void* addr) const
-{	
-	short* dest = (short*)addr;	
-	for(int i=0;i<64*64/2;i++)
-		asm volatile(
-			"\n PUSH {r0, r1}"				
-			"\n MOV r1, %0"
-			"\n MOV r0, %1"
-			"\n STRH r0, [r1]"
-			"\n POP {r0, r1}"
-				:
-				: "r" (dest+i), "r" (0));
-}
-
 void BuildingSprite::draw_vram() const
 {
 	int w = building->get_px_width();
@@ -162,8 +148,6 @@ void BuildingSprite::wipe_vram()
 BuildingSprite::~BuildingSprite()
 {
 	for(int i=0;i<3;i++)
-		delete auxiliary[i];
-	if(auto_clean)
-		delete building;	
+		delete auxiliary[i];	
 	wipe_vram();
 }

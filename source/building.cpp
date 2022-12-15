@@ -158,11 +158,11 @@ void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, voi
 	}
 }
 
-bool Building::can_be_placed_on(const char* map, int stride, int row, int col) const
+bool Building::can_be_placed_on(const int* map, int stride, int row, int col) const
 {
 	bool row_shift = (row % 2 == 1);
 	
-	const char* tl = map+row*stride+col;	
+	const int* tl = map+row*stride+col;	
 	const char* cm = collision_matrix;
 	
 	for(int r=0;r<rows_count;r++)
