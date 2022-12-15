@@ -150,7 +150,7 @@ public:
 		
 		dmaCopy(ROA_map_pal, BG_PALETTE, ROA_map_pal_len);			
 		dmaCopy(ROA_map_pal, SPRITE_PALETTE, ROA_map_pal_len);
-		SPRITE_PALETTE[0xBF] = Drawing::Colors::Red;
+		SPRITE_PALETTE[0xCF] = Drawing::Colors::Red;
 		
 		IconSprite::init_gfx();			
 				

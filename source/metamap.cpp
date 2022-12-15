@@ -143,5 +143,5 @@ Metamap::~Metamap()
 { 
 	delete[] map_metadata; 
 	delete[] bld_addr;
-	delete[] buildings;	
+	delete[] buildings;
 }

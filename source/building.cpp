@@ -113,8 +113,8 @@ void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, voi
 							
 				if(invalid && (iy&1))
 				{
-					if((s&0x00FF)!=0) s = (s&0xFF00)|0x00BF;
-					if((s&0xFF00)!=0) s = (s&0x00FF)|0xBF00;
+					if((s&0x00FF)!=0) s = (s&0xFF00)|0x00CF;
+					if((s&0xFF00)!=0) s = (s&0x00FF)|0xCF00;
 				}						
 				if((s&0x00FF)!=0) t = (t&0xFF00)|(s&0x00FF);
 				if((s&0xFF00)!=0) t = (t&0x00FF)|(s&0xFF00);										
@@ -145,8 +145,8 @@ void Building::copy_gfx(int src_x, int src_y, int src_width, int src_height, voi
 				
 				if(invalid && (iy&1))
 				{
-					if((s&0x00FF)!=0) s = (s&0xFF00)|0x00BF;
-					if((s&0xFF00)!=0) s = (s&0x00FF)|0xBF00;
+					if((s&0x00FF)!=0) s = (s&0xFF00)|0x00CF;
+					if((s&0xFF00)!=0) s = (s&0x00FF)|0xCF00;
 				}						
 				if((s&0x00FF)!=0) t = (t&0xFF00)|(s&0x00FF);
 				if((s&0xFF00)!=0) t = (t&0x00FF)|(s&0xFF00);										

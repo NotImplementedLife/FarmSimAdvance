@@ -7,7 +7,7 @@ using namespace Astralbrew::Objects;
 
 IconSprite::IconSprite(int icon_id) : Sprite(ObjSize::SIZE_32x32, ObjBitDepth::_4bit, 1)
 {
-	get_attribute()->set_palette_number(0xC);	
+	get_attribute()->set_palette_number(0xD);	
 	this->icon_id = icon_id;
 	vram_addr.set_value((void*)(0x06017400 + 32*32/2 * icon_id));
 	
@@ -24,7 +24,7 @@ void IconSprite::init_gfx(int menu_type)
 {
 	if(menu_type == MENU_BUILDING)
 	{
-		dmaCopy(ROA_buildingsicn4pal, &SPRITE_PALETTE[0xC0], ROA_buildingsicn4pal_len);	
+		dmaCopy(ROA_buildingsicn4pal, &SPRITE_PALETTE[0xD0], ROA_buildingsicn4pal_len);	
 		dmaCopy(ROA_buildingsicn4, (void*)0x06017400, ROA_buildingsicn4_len);	
 	}
 }
