@@ -5,6 +5,7 @@
 
 #include "building.hpp"
 #include "icon_sprite.hpp"
+#include "cursor_sprite.hpp"
 
 using namespace Astralbrew::World;
 using namespace Astralbrew;
@@ -26,7 +27,9 @@ private:
 	inline static constexpr int cam_left = 264;
 	inline static constexpr int cam_top = 208;
 	inline static constexpr int cam_width = 1136;
-	inline static constexpr int cam_height = 512;	
+	inline static constexpr int cam_height = 512;
+
+	Cursor* cursor;
 	
 
 	void display(int x0, int y0, int r0, int r1)
@@ -153,6 +156,8 @@ public:
 		SPRITE_PALETTE[0xCF] = Drawing::Colors::Red;
 		
 		IconSprite::init_gfx();			
+		
+		cursor = new Cursor();
 				
 	}	
 	
@@ -229,6 +234,10 @@ public:
 						icons[i]->update_position(nullptr);
 					}
 				}
+				
+				cursor->update_visual();
+				cursor->update_position(nullptr);
+				
 				OamPool::deploy();
 				break;
 			}
