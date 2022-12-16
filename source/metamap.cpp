@@ -99,17 +99,18 @@ void Metamap::draw_buildings(int x, int y, int w, int h, short* dest, int dest_s
 	assert(w%2==0);
 	
 	int x0 = x-24;
-	int y0 = y-building_max_height/2;
+	int y0 = y-building_max_height/2;	
 	
-	int r = (y0/8+x0/12)/2;
-	int c = (y0/8-x0/12)/2;
+	int r = (32 * y0 + 64 * x0 / 3 - 256) >> 9;
+    int c = (32 * y0 - 64 * x0 / 3 + 256) >> 9;
 	
 	int r0 = clamp(r+c, 0, height-1);	
 	
 	int x1 = x+w;
 	int y1 = y+h+3*building_max_height/4;
-	r = (y1/8+x1/12)/2;
-	c = (y1/8-x1/12)/2;	
+	
+	r = (32 * y1 + 64 * x1 / 3 - 256) >> 9;
+    c = (32 * y1 - 64 * x1 / 3 + 256) >> 9;	
 	int r1 = clamp(r+c, 0, height-1);	
 		
 	for(int ir=r0;ir<=r1;ir++)
