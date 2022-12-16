@@ -384,6 +384,7 @@ private:
 		crt_icon_id = 0;
 		schedule_task(&menu_move_task);
 		
+		cursor->set_hand();
 		set_mode(MODE_MENU);
 	}
 	
@@ -411,6 +412,8 @@ private:
 			delete icons[i];
 			icons[i] = nullptr;
 		}		
+		
+		cursor->set_carrot();
 		set_mode(MODE_SELECT);
 	}
 	
@@ -437,15 +440,18 @@ private:
 		if(!building_sprite->is_valid_placed()) 
 			return;
 		
-		metamap.place(building_sprite->get_building(), building_place_r, building_place_c);		
+		const Building* building = building_sprite->get_building();
+		
+		metamap.place(building, building_place_r, building_place_c);
 						
 		draw_building_x = map_x-cam_left;
 		draw_building_y = map_y-cam_top;
 		draw_building_w = 240;
 		draw_building_h = 160;
 		draw_building_scheduled = true;		
-		
-		building_place_cancel();		
+				
+		building_place_cancel(true);
+		building_place_start(new Building(building));
 	}
 	
 	bool draw_building_scheduled = false;
@@ -454,10 +460,14 @@ private:
 	int draw_building_w;
 	int draw_building_h;	
 	
-	void building_place_cancel()
+	void building_place_cancel(bool success = false)
 	{
+		if(!success)
+		{
+			delete building_sprite->get_building();
+		}
 		delete building_sprite;
-		building_sprite = nullptr;
+		building_sprite = nullptr;		
 		set_mode(MODE_SELECT);
 	}
 	

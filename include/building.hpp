@@ -26,6 +26,8 @@ public:
 	Building(const short* res_gfx, int px_width, int px_height, int rows_count, int cols_count, const char* collision_matrix);
 	Building(const short* res_gfx); // and let the code choose the right settings
 	
+	Building(const Building* building);
+	
 	const short* get_res_gfx() const;
 	
 	int get_px_width() const;
@@ -74,7 +76,7 @@ public:
 	int px_width() const;
 	int px_height() const;
 	
-	static void wipe_vram();
+	static void wipe_vram();	
 	
 	~BuildingSprite();
 };

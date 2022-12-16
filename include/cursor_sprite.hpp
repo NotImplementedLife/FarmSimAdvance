@@ -12,4 +12,12 @@ public:
 	~Cursor() = default;
 	
 	static void init_gfx(int mode);
+	
+	void set_hand();
+	
+	void set_carrot();
+	
+	void hide();
+	
+	void show();
 };

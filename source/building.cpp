@@ -72,6 +72,16 @@ Building::Building(const short* res_gfx)
 	}	
 }
 
+Building::Building(const Building* building)
+{
+	this->res_gfx = building->res_gfx;
+	this->px_width = building->px_width;
+	this->px_height = building->px_height;
+	this->rows_count = building->rows_count;
+	this->cols_count = building->cols_count;
+	this->collision_matrix = building->collision_matrix;
+}
+
 const short* Building::get_res_gfx() const { return res_gfx;}
 
 int Building::get_px_width() const { return px_width;}

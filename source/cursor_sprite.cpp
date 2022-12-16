@@ -17,11 +17,11 @@ Cursor::Cursor() : Sprite(ObjSize::SIZE_16x16, ObjBitDepth::_4bit, 1)
 	
 	set_anchor(128,128);
 	
-	get_attribute()->set_priority(0);	
-	set_position(120,80);
+	get_attribute()->set_priority(0);		
 	
 	dmaCopy(ROA_icons4pal, &SPRITE_PALETTE[0xE0], ROA_icons4pal_len);
-	init_gfx(1);
+	
+	set_carrot();
 }
 
 void Cursor::init_gfx(int mode)
@@ -30,4 +30,26 @@ void Cursor::init_gfx(int mode)
 	short* dst = (short*)0x06017C00;
 	for(int i=0;i<64;i++)
 		*(dst++)=*(src++);
+}
+
+void Cursor::set_hand()
+{
+	init_gfx(0);
+	set_position(120,120);
+}
+	
+void Cursor::set_carrot()
+{
+	init_gfx(1);
+	set_position(120,80);
+}
+
+void Cursor::hide()
+{
+	get_attribute()->hide();
+}
+
+void Cursor::show()
+{
+	get_attribute()->show();
 }
