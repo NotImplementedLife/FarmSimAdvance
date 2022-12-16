@@ -30,6 +30,19 @@ bool Metamap::can_place(const Building* building, int row, int col) const
 	return true;
 }
 
+const Building* Metamap::building_at(int x, int y) const
+{
+	//int r = (y/8+x/12)/2;
+	//int c = (y/8-x/12)/2;
+	int r = (32 * y + 64 * x / 3 - 256) >> 9;
+    int c = (32 * y - 64 * x / 3 + 256) >> 9;
+	
+	int rr = r+c;
+	int cc = (r-c)/2;
+	
+	return bld_addr[rr*stride + cc];	
+}
+
 void Metamap::place(const Building* building, int row, int col)
 {
 	bool row_shift = (row % 2 == 1);
@@ -56,6 +69,7 @@ void Metamap::place(const Building* building, int row, int col)
 			}
 		}
 		tl+=stride;
+		bld_tl+=stride;
 	}				
 	
 	int mid_r = min1r + 2*((max1r-min1r)/2);

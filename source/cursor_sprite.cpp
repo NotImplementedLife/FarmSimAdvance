@@ -41,7 +41,7 @@ void Cursor::set_hand()
 void Cursor::set_carrot()
 {
 	init_gfx(1);
-	set_position(120,80);
+	set_position(128,88);
 }
 
 void Cursor::hide()

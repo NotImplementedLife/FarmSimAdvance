@@ -57,8 +57,8 @@ private:
 	
 	void move_steps(int dx, int dy, int r0, int r1, bool update_map_coords=false)
 	{
-		if(dx<0) dx=-8/2; else if(dx>0) dx=8/2;
-		if(dy<0) dy=-6; else if(dy>0) dy=6;		
+		if(dx<0) dx=-6/2; else if(dx>0) dx=6/2;
+		if(dy<0) dy=-4; else if(dy>0) dy=4;		
 		
 		if(update_map_coords)
 		{			
@@ -176,8 +176,10 @@ public:
 		int bx = map_x + 120 - building_sprite->px_width()/2;
 		int by = map_y + 80 - building_sprite->px_height()/2;
 		
-		int r = (by/8+bx/12)/2;
-		int c = (by/8-bx/12)/2;
+		//int r = (by/8+bx/12)/2;
+		//int c = (by/8-bx/12)/2;
+		int r = (32 * by + 64 * bx / 3 - 256) >> 9;
+        int c = (32 * by - 64 * bx / 3 + 256) >> 9;
 		
 		int rr = r+c;
 		int cc = (r-c)/2;		
@@ -273,6 +275,17 @@ public:
 		return false;
 	}	
 	
+	
+	#define VOLADDR(addr, type)             (*(type volatile *)(addr))
+	#define REG_NOCASH_LOG          VOLADDR(0x04FFFA1C, u8)
+	
+	void no$log(const char* str)
+	{
+		while(*str)
+			REG_NOCASH_LOG = *str++;
+		REG_NOCASH_LOG = '\n';
+	}
+	
 	void process_keys_down(int keys)
 	{
 		switch(mode)
@@ -282,8 +295,22 @@ public:
 					break;
 				else if(keys & KEY_L)
 				{
-					launch_menu(IconSprite::MENU_BUILDING);
-					//building_place_start(new Building(BLD_CHICKEN_COOP));
+					launch_menu(IconSprite::MENU_BUILDING);					
+				}
+				else if(keys & KEY_A)
+				{
+					int x = map_x - cam_left + 120;
+					int y = map_y - cam_top + 80;
+					const Building*  sel_building = metamap.building_at(x,y);
+					if(sel_building != nullptr)
+					{												
+						no$log("here");
+						no$log(sf24(x).to_string());
+						no$log(sf24(y).to_string());
+										
+						
+						launch_menu(IconSprite::MENU_BUILDING);
+					}					
 				}
 				break;
 			case MODE_PLACE_BUILDING:

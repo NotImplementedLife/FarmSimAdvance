@@ -23,6 +23,7 @@ private:
 	inline static constexpr int building_max_height = 80;
 	
 	Astralbrew::Vector<Record>* buildings = new Astralbrew::Vector<Record>[height];
+		
 public:
 	Metamap();
 	
@@ -33,6 +34,8 @@ public:
 	void place(const Building* building, int row, int col);
 	
 	void draw_buildings(int x, int y, int w, int h, short* dest, int dest_stride) const;
+	
+	const Building* building_at(int x, int y) const;
 	
 	~Metamap();
 };
