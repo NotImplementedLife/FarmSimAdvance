@@ -11,6 +11,33 @@ short BLD_SAND_ROAD    [ 24 * 16 / 2];
 __attribute__((section(".ewram.bld")))
 short BLD_CHICKEN_COOP [120 * 80 / 2];
 
+__attribute__((section(".ewram.bld")))
+short BLD_SMALL_WHEAT_0  [48 * 40 / 2];
+__attribute__((section(".ewram.bld")))
+short BLD_SMALL_WHEAT_1  [48 * 40 / 2];
+__attribute__((section(".ewram.bld")))
+short BLD_SMALL_WHEAT_2  [48 * 40 / 2];
+__attribute__((section(".ewram.bld")))
+short BLD_SMALL_WHEAT_3  [48 * 40 / 2];
+
+__attribute__((section(".ewram.bld")))
+short BLD_MEDIUM_WHEAT_0 [72 * 48 / 2];
+__attribute__((section(".ewram.bld")))
+short BLD_MEDIUM_WHEAT_1 [72 * 48 / 2];
+__attribute__((section(".ewram.bld")))
+short BLD_MEDIUM_WHEAT_2 [72 * 48 / 2];
+__attribute__((section(".ewram.bld")))
+short BLD_MEDIUM_WHEAT_3 [72 * 48 / 2];
+
+__attribute__((section(".ewram.bld")))
+short BLD_LARGE_WHEAT_0  [72 * 64 / 2];
+__attribute__((section(".ewram.bld")))
+short BLD_LARGE_WHEAT_1  [72 * 64 / 2];
+__attribute__((section(".ewram.bld")))
+short BLD_LARGE_WHEAT_2  [72 * 64 / 2];
+__attribute__((section(".ewram.bld")))
+short BLD_LARGE_WHEAT_3  [72 * 64 / 2];
+
 
 #include "map.h"
 void extract_from_map(short* dest, int x, int y,int w, int h)
@@ -34,6 +61,22 @@ void init_buildings_gfx()
 	extract_from_map(BLD_LARGE_PLOT  , 1896, 64,  72, 48);
 	extract_from_map(BLD_SAND_ROAD   , 1992, 80,  24, 16);
 	extract_from_map(BLD_CHICKEN_COOP, 2076, 56, 120, 80);
+	
+	extract_from_map(BLD_SMALL_WHEAT_0, 2220, 56, 48, 40);
+	extract_from_map(BLD_SMALL_WHEAT_1, 2292, 56, 48, 40);
+	extract_from_map(BLD_SMALL_WHEAT_2, 2364, 56, 48, 40);
+	extract_from_map(BLD_SMALL_WHEAT_3, 2220, 104, 48, 40);	
+	
+		
+	extract_from_map(BLD_MEDIUM_WHEAT_0, 2292, 104, 72, 48);
+	extract_from_map(BLD_MEDIUM_WHEAT_1, 2220, 168, 72, 48);
+	extract_from_map(BLD_MEDIUM_WHEAT_2, 2316, 168, 72, 48);
+	extract_from_map(BLD_MEDIUM_WHEAT_3, 2220, 232, 72, 48);
+	
+	extract_from_map(BLD_LARGE_WHEAT_0, 2244, 296, 72, 64);
+	extract_from_map(BLD_LARGE_WHEAT_1, 1812, 344, 72, 64);
+	extract_from_map(BLD_LARGE_WHEAT_2, 1956, 344, 72, 64);
+	extract_from_map(BLD_LARGE_WHEAT_3, 2100, 344, 72, 64);
 }
 
 
@@ -65,6 +108,18 @@ Building::Building(const short* res_gfx)
 	else if(res_gfx == BLD_CHICKEN_COOP)	
 	{
 		px_width = 120, px_height = 80, rows_count = 9, cols_count = 5; collision_matrix=COL_4x4_80; return;
+	}
+	else if(res_gfx == BLD_SMALL_WHEAT_0 || res_gfx == BLD_SMALL_WHEAT_1 || res_gfx == BLD_SMALL_WHEAT_2 || res_gfx == BLD_SMALL_WHEAT_3)
+	{
+		px_width = 48; px_height = 40; rows_count = 4; cols_count = 2; collision_matrix = COL_1x1_40;
+	}
+	else if(res_gfx == BLD_MEDIUM_WHEAT_0 || res_gfx == BLD_MEDIUM_WHEAT_1 || res_gfx == BLD_MEDIUM_WHEAT_2 || res_gfx == BLD_MEDIUM_WHEAT_3)
+	{
+		px_width = 72; px_height = 48; rows_count = 5; cols_count = 3; collision_matrix = COL_2x2_48;
+	}
+	else if(res_gfx == BLD_LARGE_WHEAT_0 || res_gfx == BLD_LARGE_WHEAT_1 || res_gfx == BLD_LARGE_WHEAT_2 || res_gfx == BLD_LARGE_WHEAT_3)
+	{
+		px_width = 72; px_height = 64; rows_count = 7; cols_count = 3; collision_matrix = COL_3x3_64;
 	}
 	else
 	{

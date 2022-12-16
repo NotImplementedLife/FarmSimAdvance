@@ -418,6 +418,7 @@ private:
 	}
 	
 	inline static constexpr short* menu_opt_bld[4] = { BLD_SMALL_PLOT, BLD_MEDIUM_PLOT, BLD_LARGE_PLOT, BLD_CHICKEN_COOP };
+	//inline static constexpr short* menu_opt_bld[4] = { BLD_LARGE_WHEAT_0, BLD_LARGE_WHEAT_1, BLD_LARGE_WHEAT_2, BLD_LARGE_WHEAT_3 };
 	
 	void menu_select()
 	{

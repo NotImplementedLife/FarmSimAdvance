@@ -6,10 +6,31 @@ extern short BLD_LARGE_PLOT   [];
 extern short BLD_SAND_ROAD    [];
 extern short BLD_CHICKEN_COOP [];
 
+extern short BLD_SMALL_WHEAT_0  [];
+extern short BLD_SMALL_WHEAT_1  [];
+extern short BLD_SMALL_WHEAT_2  [];
+extern short BLD_SMALL_WHEAT_3  [];
+
+
+extern short BLD_MEDIUM_WHEAT_0 [];
+extern short BLD_MEDIUM_WHEAT_1 [];
+extern short BLD_MEDIUM_WHEAT_2 [];
+extern short BLD_MEDIUM_WHEAT_3 [];
+
+extern short BLD_LARGE_WHEAT_0  [];
+extern short BLD_LARGE_WHEAT_1  [];
+extern short BLD_LARGE_WHEAT_2  [];
+extern short BLD_LARGE_WHEAT_3  [];
+
 extern char COL_1x1_16[];
 extern char COL_2x2_32[];
 extern char COL_3x3_48[];
 extern char COL_4x4_80[];
+
+extern char COL_1x1_40[];
+extern char COL_2x2_48[];
+extern char COL_3x3_64[];
+
 
 
 void init_buildings_gfx();
