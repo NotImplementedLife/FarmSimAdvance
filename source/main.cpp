@@ -375,7 +375,7 @@ public:
 			case MODE_SELECT:
 				if(process_movement(keys))
 					break;
-			case MODE_PLACE_BUILDING:				
+			case MODE_PLACE_BUILDING:
 				if(process_movement(keys))
 					break;
 		}		
@@ -408,12 +408,6 @@ public:
 	{
 		delete[] row;		
 	}
-	
-private:
-	/*void drawBuilding(const Building* building, int x, int y)
-	{				
-		building->copy_gfx(0,0,building->get_px_width(), building->get_px_height(), BACK, 240, x, y);
-	}*/
 	
 private:	
 	IconSprite* icons[4] = {nullptr, nullptr, nullptr, nullptr};
@@ -518,7 +512,7 @@ private:
 		}
 	}
 private:
-	void building_place_start(const Building* building)
+	void building_place_start(Building* building)
 	{
 		building_sprite = new BuildingSprite(building);
 		building_sprite->set_position(120,80);
@@ -530,7 +524,7 @@ private:
 		if(!building_sprite->is_valid_placed()) 
 			return;
 		
-		const Building* building = building_sprite->get_building();
+		Building* building = building_sprite->get_building();
 		
 		metamap.place(building, building_place_r, building_place_c);
 						

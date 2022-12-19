@@ -41,12 +41,12 @@ const Building* Metamap::building_at(int x, int y) const
 	return bld_addr[rr*stride + cc];	
 }
 
-void Metamap::place(const Building* building, int row, int col)
+void Metamap::place(Building* building, int row, int col)
 {
 	bool row_shift = (row % 2 == 1);
 	
 	char* tl = map_metadata+row*stride+col;	
-	const Building* *bld_tl = bld_addr + row*stride+col;
+	Building* *bld_tl = bld_addr + row*stride+col;
 	const char* cm = building->get_collision_matrix();	
 	
 	int min1r = -1;
@@ -158,7 +158,7 @@ void Metamap::remove(const Building* building)
 	int r0 = -1;
 	int r1 = 0;
 	char* tl = map_metadata;	
-	const Building* *bld_tl = bld_addr;
+	Building* *bld_tl = bld_addr;
 	for(int r=0;r<height;r++)
 	{
 		for(int c=0;c<stride;c++)

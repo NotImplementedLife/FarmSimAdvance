@@ -3,7 +3,7 @@
 using namespace Astralbrew::Entity;
 using namespace Astralbrew::Objects;
 
-BuildingSprite::BuildingSprite(const Building* building) : Sprite(ObjSize::SIZE_64x64, ObjBitDepth::_8bit, 1)
+BuildingSprite::BuildingSprite(Building* building) : Sprite(ObjSize::SIZE_64x64, ObjBitDepth::_8bit, 1)
 {
 	this->building=building;
 	int w = building->get_px_width();
@@ -104,7 +104,7 @@ void BuildingSprite::set_placement_validity(bool valid)
 	draw_vram();
 }
 
-const Building* BuildingSprite::get_building() const { return building;}
+Building* BuildingSprite::get_building() const { return building;}
 
 void BuildingSprite::update(const Astralbrew::World::Camera* camera)
 {		

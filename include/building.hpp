@@ -83,21 +83,21 @@ class BuildingSprite : public Astralbrew::Entity::Sprite
 {
 private:	
 	Astralbrew::Memory::Address vram_addr;
-	const Building* building;
+	Building* building;
 	Sprite* auxiliary[3] = {nullptr, nullptr, nullptr};
 	Astralbrew::Memory::Address aux_vram[3];	
 	bool invalid_placement = false;
 	void draw_vram() const;
 	void clear_vram(void* addr) const;			
 public:
-	BuildingSprite(const Building* building);
+	BuildingSprite(Building* building);
 	
 	void update(const Astralbrew::World::Camera* camera = nullptr);
 	
 	void set_placement_validity(bool valid);
 	bool is_valid_placed() const;
 	
-	const Building* get_building() const;
+	Building* get_building() const;
 	
 	int px_width() const;
 	int px_height() const;

@@ -18,7 +18,7 @@ private:
 	inline static constexpr int height = 73;
 	inline static constexpr int stride = 48;
 	char* map_metadata = new char[height*stride];
-	const Building* *bld_addr = new const Building*[height*stride];
+	Building* *bld_addr = new Building*[height*stride];
 	
 	inline static constexpr int building_max_height = 80;
 	
@@ -31,13 +31,15 @@ public:
 	
 	bool can_place(const Building* building, int row, int col) const;
 		
-	void place(const Building* building, int row, int col);
+	void place(Building* building, int row, int col);
 	
 	void draw_buildings(int x, int y, int w, int h, short* dest, int dest_stride) const;
 		
 	const Building* building_at(int x, int y) const;
 	
 	void remove(const Building* building);
+	
+	//void update(const Building* building, );
 	
 	~Metamap();
 };
