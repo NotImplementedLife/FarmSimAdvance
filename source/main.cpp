@@ -339,7 +339,8 @@ public:
 					break;
 				else if(keys & KEY_A)
 				{
-					building_place_confirm();
+					if(!(metaframe_keys_held & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)))
+						building_place_confirm();
 				}
 				else if(keys & KEY_B)
 				{
@@ -374,7 +375,7 @@ public:
 			case MODE_SELECT:
 				if(process_movement(keys))
 					break;
-			case MODE_PLACE_BUILDING:
+			case MODE_PLACE_BUILDING:				
 				if(process_movement(keys))
 					break;
 		}		
