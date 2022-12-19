@@ -1,6 +1,7 @@
 #include "icon_sprite.hpp"
 
 #include "buildingsicn4.h"
+#include "acticn4.h"
 
 using namespace Astralbrew::Entity;
 using namespace Astralbrew::Objects;
@@ -26,6 +27,11 @@ void IconSprite::init_gfx(int menu_type)
 	{
 		dmaCopy(ROA_buildingsicn4pal, &SPRITE_PALETTE[0xD0], ROA_buildingsicn4pal_len);	
 		dmaCopy(ROA_buildingsicn4, (void*)0x06017400, ROA_buildingsicn4_len);	
+	}
+	else if(menu_type == MENU_ACTIONS)
+	{
+		dmaCopy(ROA_acticn4pal, &SPRITE_PALETTE[0xD0], ROA_acticn4pal_len);
+		dmaCopy(ROA_acticn4, (void*)0x06017400, ROA_acticn4_len);
 	}
 }
 

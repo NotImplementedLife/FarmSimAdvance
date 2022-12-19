@@ -15,6 +15,7 @@ public:
 	int get_icon_id() const;
 	
 	inline static constexpr int MENU_BUILDING = 0;
+	inline static constexpr int MENU_ACTIONS = 1;
 	
 	inline static constexpr int u = 16;
 

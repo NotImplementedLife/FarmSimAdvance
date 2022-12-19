@@ -31,9 +31,7 @@ bool Metamap::can_place(const Building* building, int row, int col) const
 }
 
 const Building* Metamap::building_at(int x, int y) const
-{
-	//int r = (y/8+x/12)/2;
-	//int c = (y/8-x/12)/2;
+{	
 	int r = (32 * y + 64 * x / 3 - 256) >> 9;
     int c = (32 * y - 64 * x / 3 + 256) >> 9;
 	
@@ -151,6 +149,43 @@ void Metamap::draw_buildings(int x, int y, int w, int h, short* dest, int dest_s
 				dst+=dest_stride/2;
 			}
 		}
+	}	
+}
+
+void Metamap::remove(const Building* building)
+{	
+	if(building==nullptr) return;
+	int r0 = -1;
+	int r1 = 0;
+	char* tl = map_metadata;	
+	const Building* *bld_tl = bld_addr;
+	for(int r=0;r<height;r++)
+	{
+		for(int c=0;c<stride;c++)
+		{
+			if(bld_tl[c] == building)
+			{
+				tl[c]=0;							
+				bld_tl[c] = nullptr;
+				if(r0<0) r0 = r;
+				r1 = r;
+			}
+		}
+		tl += stride;
+		bld_tl += stride;
+	}
+	
+	bool found = false;
+	for(int r=r0;r<=r1 && !found;r++)
+	{
+		for(int i=0;i<buildings[r].size();i++)
+		{
+			if(buildings[r][i].building == building)
+			{
+				buildings[r].remove_at(i);
+				break;
+			}
+		}		
 	}	
 }
 

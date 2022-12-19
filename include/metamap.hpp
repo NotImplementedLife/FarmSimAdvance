@@ -34,8 +34,10 @@ public:
 	void place(const Building* building, int row, int col);
 	
 	void draw_buildings(int x, int y, int w, int h, short* dest, int dest_stride) const;
-	
+		
 	const Building* building_at(int x, int y) const;
+	
+	void remove(const Building* building);
 	
 	~Metamap();
 };

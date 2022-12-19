@@ -35,7 +35,7 @@ void Cursor::init_gfx(int mode)
 void Cursor::set_hand()
 {
 	init_gfx(0);
-	set_position(120,120);
+	set_position(124,120);
 }
 	
 void Cursor::set_carrot()

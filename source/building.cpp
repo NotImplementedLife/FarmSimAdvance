@@ -241,3 +241,34 @@ bool Building::can_be_placed_on(const int* map, int stride, int row, int col) co
 	}			
 	return true;
 }
+
+bool Building::is_empty_plot() const
+{
+	return get_res_gfx() == BLD_SMALL_PLOT
+		|| get_res_gfx() == BLD_MEDIUM_PLOT
+		|| get_res_gfx() == BLD_LARGE_PLOT;
+}
+bool Building::is_crops_growing() const
+{
+	return get_res_gfx() == BLD_SMALL_WHEAT_0
+		|| get_res_gfx() == BLD_MEDIUM_WHEAT_0
+		|| get_res_gfx() == BLD_LARGE_WHEAT_0
+		|| get_res_gfx() == BLD_SMALL_WHEAT_1
+		|| get_res_gfx() == BLD_MEDIUM_WHEAT_1
+		|| get_res_gfx() == BLD_LARGE_WHEAT_1
+		|| get_res_gfx() == BLD_SMALL_WHEAT_2
+		|| get_res_gfx() == BLD_MEDIUM_WHEAT_2
+		|| get_res_gfx() == BLD_LARGE_WHEAT_2;
+}
+
+bool Building::is_crops_ready() const
+{
+	return get_res_gfx() == BLD_SMALL_WHEAT_3
+		|| get_res_gfx() == BLD_MEDIUM_WHEAT_3
+		|| get_res_gfx() == BLD_LARGE_WHEAT_3;
+}
+
+bool Building::is_chicken_coop() const
+{
+	return get_res_gfx() == BLD_CHICKEN_COOP;
+}

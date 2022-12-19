@@ -69,6 +69,11 @@ public:
 	bool can_be_placed_on(const int* map, int stride, int row, int col) const;	
 	
 	virtual ~Building() = default;
+	
+	bool is_empty_plot() const;
+	bool is_crops_growing() const;
+	bool is_crops_ready() const;
+	bool is_chicken_coop() const;
 };
 
 

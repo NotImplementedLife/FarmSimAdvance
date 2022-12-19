@@ -145,6 +145,9 @@ public:
 		
 		Video::objEnable1D();
 		
+		camera.set_x(336);
+		camera.set_y(156);
+		
 		map_x = cam_left-120+camera.get_x();
 		map_y = cam_top -80 +camera.get_y();
 		display(map_x,map_y,0,160);		
@@ -175,16 +178,13 @@ public:
 		assert(building_sprite!=nullptr);
 		int bx = map_x + 120 - building_sprite->px_width()/2;
 		int by = map_y + 80 - building_sprite->px_height()/2;
-		
-		//int r = (by/8+bx/12)/2;
-		//int c = (by/8-bx/12)/2;
+				
 		int r = (32 * by + 64 * bx / 3 - 256) >> 9;
         int c = (32 * by - 64 * bx / 3 + 256) >> 9;
 		
 		int rr = r+c;
 		int cc = (r-c)/2;		
-		
-		// FATAL_ERROR(sf24(cc).to_string());
+				
 		
 		bx = cc*24 + (rr&1)*12;
 		by = (rr/2)*16 + (rr&1)*8;
@@ -214,7 +214,16 @@ public:
 				move_steps(mvx,mvy, 120, 160);
 				if(draw_building_scheduled)
 				{
-					metamap.draw_buildings(draw_building_x, draw_building_y, draw_building_w, draw_building_h, (short*)BACK, 240);
+					if(draw_refresh)
+					{
+						display(map_x, map_y, 0, 160);
+						metamap.draw_buildings(map_x-cam_left, map_y-cam_top, 240, 160, (short*)BACK, 240);
+						draw_refresh = false;
+					}
+					else
+					{
+						metamap.draw_buildings(draw_building_x, draw_building_y, draw_building_w, draw_building_h, (short*)BACK, 240);
+					}
 					draw_building_scheduled = false;
 				}
 				break;
@@ -276,8 +285,8 @@ public:
 	}	
 	
 	
-	#define VOLADDR(addr, type)             (*(type volatile *)(addr))
-	#define REG_NOCASH_LOG          VOLADDR(0x04FFFA1C, u8)
+	#define VOLADDR(addr, type) (*(type volatile *)(addr))
+	#define REG_NOCASH_LOG      VOLADDR(0x04FFFA1C, u8)
 	
 	void no$log(const char* str)
 	{
@@ -285,6 +294,12 @@ public:
 			REG_NOCASH_LOG = *str++;
 		REG_NOCASH_LOG = '\n';
 	}
+	
+	inline static constexpr int ACTION_FREE_PLOT = 1<<8;
+	inline static constexpr int ACTION_CROPS_GROWING = 2<<8;
+	inline static constexpr int ACTION_CHICKEN_FEED = 3<<8;
+	
+	const Building*  sel_building = nullptr;
 	
 	void process_keys_down(int keys)
 	{
@@ -301,16 +316,22 @@ public:
 				{
 					int x = map_x - cam_left + 120;
 					int y = map_y - cam_top + 80;
-					const Building*  sel_building = metamap.building_at(x,y);
+					sel_building = metamap.building_at(x,y);
 					if(sel_building != nullptr)
-					{												
-						no$log("here");
-						no$log(sf24(x).to_string());
-						no$log(sf24(y).to_string());
-										
-						
-						launch_menu(IconSprite::MENU_BUILDING);
-					}					
+					{									
+						if(sel_building->is_empty_plot())
+						{							
+							launch_menu(IconSprite::MENU_ACTIONS | ACTION_FREE_PLOT);
+						}
+						else if(sel_building->is_crops_ready())
+						{
+														
+						}
+						else if(sel_building->is_chicken_coop())
+						{
+							launch_menu(IconSprite::MENU_ACTIONS | ACTION_CHICKEN_FEED);
+						}
+					}
 				}
 				break;
 			case MODE_PLACE_BUILDING:
@@ -403,10 +424,33 @@ private:
 	void launch_menu(int menu_type)
 	{
 		this->menu_type = menu_type;
-		IconSprite::init_gfx(menu_type);
-		for(int i=0;i<4;i++)
+		IconSprite::init_gfx(menu_type & 0xFF);		
+		if((menu_type & 0xFF) == IconSprite::MENU_ACTIONS)
+		{			
+			int k=0;
+			switch(menu_type & 0xFF00)
+			{
+				case ACTION_FREE_PLOT:
+					icons[k++] = new IconSprite(0);					
+					break;
+				case ACTION_CROPS_GROWING:
+					icons[k++] = new IconSprite(1);
+					icons[k-1]->set_position(icons[k-1]->pos_x()-40,icons[k-1]->pos_y());
+					break;
+				case ACTION_CHICKEN_FEED:
+					icons[k++] = new IconSprite(2);
+					icons[k-1]->set_position(icons[k-1]->pos_x()-80,icons[k-1]->pos_y());
+					break;
+			}
+			icons[k++] = new IconSprite(3);
+			icons[k-1]->set_position(icons[k-1]->pos_x()-k*40,icons[k-1]->pos_y());
+		}
+		else
 		{
-			icons[i] = new IconSprite(i);
+			for(int i=0;i<4;i++)
+			{
+				icons[i] = new IconSprite(i);
+			}
 		}
 		crt_icon_id = 0;
 		schedule_task(&menu_move_task);
@@ -418,6 +462,7 @@ private:
 	void menu_left()
 	{
 		if(crt_icon_id==0) return;
+		if(icons[crt_icon_id-1]==nullptr) return;
 		crt_icon_id--;
 		menu_move_task.to_right();
 	}
@@ -425,6 +470,7 @@ private:
 	void menu_right()
 	{
 		if(crt_icon_id==3) return;
+		if(icons[crt_icon_id+1]==nullptr) return;
 		crt_icon_id++;
 		menu_move_task.to_left();
 	}
@@ -449,10 +495,25 @@ private:
 	
 	void menu_select()
 	{
-		if(menu_type == IconSprite::MENU_BUILDING)
+		if((menu_type & 0xFF) == IconSprite::MENU_BUILDING)
 		{			
 			menu_cancel();
 			building_place_start(new Building(menu_opt_bld[crt_icon_id]));
+		}
+		if((menu_type & 0xFF) == IconSprite::MENU_ACTIONS)
+		{
+			int icon_id = icons[crt_icon_id]->get_icon_id();
+			menu_cancel();
+			switch(icon_id)
+			{
+				case 3:					
+					metamap.remove(sel_building);								
+					// force redraw				
+					draw_refresh = true;
+					draw_building_scheduled = true;							
+					
+					break;
+			}
 		}
 	}
 private:
@@ -476,6 +537,7 @@ private:
 		draw_building_y = map_y-cam_top;
 		draw_building_w = 240;
 		draw_building_h = 160;
+		draw_refresh = false;
 		draw_building_scheduled = true;		
 				
 		building_place_cancel(true);
@@ -483,6 +545,7 @@ private:
 	}
 	
 	bool draw_building_scheduled = false;
+	bool draw_refresh = false;
 	int draw_building_x;
 	int draw_building_y;
 	int draw_building_w;
@@ -562,7 +625,8 @@ private:
 		{
 			for(int i=0;i<4;i++)
 			{
-				scene->icons[i]->set_position(scene->icons[i]->pos_x()+direction, scene->icons[i]->pos_y());
+				if(scene->icons[i])
+					scene->icons[i]->set_position(scene->icons[i]->pos_x()+direction, scene->icons[i]->pos_y());
 			}
 			if(get_counter()==1) 
 			{
