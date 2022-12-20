@@ -8,7 +8,7 @@ class Metamap
 private:
 	struct Record
 	{
-		const Building* building;
+		Building* building;
 		int x;
 		int y;
 		int width;
@@ -35,11 +35,11 @@ public:
 	
 	void draw_buildings(int x, int y, int w, int h, short* dest, int dest_stride) const;
 		
-	const Building* building_at(int x, int y) const;
+	Building* building_at(int x, int y) const;
 	
-	void remove(const Building* building);
+	void remove(const Building* building);	
 	
-	//void update(const Building* building, );
+	void update_crops(Building* building);
 	
 	~Metamap();
 };

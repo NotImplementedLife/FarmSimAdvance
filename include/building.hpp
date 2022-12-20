@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Astralbrew>
+
 extern short BLD_SMALL_PLOT   [];
 extern short BLD_MEDIUM_PLOT  [];
 extern short BLD_LARGE_PLOT   [];
@@ -47,6 +49,8 @@ public:
 	Building(const short* res_gfx, int px_width, int px_height, int rows_count, int cols_count, const char* collision_matrix);
 	Building(const short* res_gfx); // and let the code choose the right settings
 	
+	void create(const short* res_gfx);
+	
 	Building(const Building* building);
 	
 	const short* get_res_gfx() const;
@@ -74,10 +78,9 @@ public:
 	bool is_crops_growing() const;
 	bool is_crops_ready() const;
 	bool is_chicken_coop() const;
+	
+	Astralbrew::Point<short> crops_next_stage();
 };
-
-
-#include <Astralbrew>
 
 class BuildingSprite : public Astralbrew::Entity::Sprite
 {

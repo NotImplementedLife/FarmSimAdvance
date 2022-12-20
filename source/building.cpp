@@ -92,6 +92,11 @@ Building::Building(const short* res_gfx, int px_width, int px_height, int rows_c
 
 Building::Building(const short* res_gfx)
 {
+	create(res_gfx);
+}
+
+void Building::create(const short* res_gfx)
+{
 	this->res_gfx = res_gfx;
 	if(res_gfx == BLD_SMALL_PLOT || res_gfx == BLD_SAND_ROAD)
 	{
@@ -271,4 +276,86 @@ bool Building::is_crops_ready() const
 bool Building::is_chicken_coop() const
 {
 	return get_res_gfx() == BLD_CHICKEN_COOP;
+}
+
+Point<short> Building::crops_next_stage()
+{
+	if(get_res_gfx()==BLD_SMALL_PLOT)
+	{
+		create(BLD_SMALL_WHEAT_0);		
+		return {-12,-24};
+	}
+	else if(get_res_gfx()==BLD_SMALL_WHEAT_0)
+	{	
+		create(BLD_SMALL_WHEAT_1);		
+		return {0,0};
+	}
+	else if(get_res_gfx()==BLD_SMALL_WHEAT_1)
+	{	
+		create(BLD_SMALL_WHEAT_2);		
+		return {0,0};
+	}
+	else if(get_res_gfx()==BLD_SMALL_WHEAT_2)
+	{	
+		create(BLD_SMALL_WHEAT_3);		
+		return {0,0};
+	}
+	else if(get_res_gfx()==BLD_SMALL_WHEAT_3)
+	{	
+		create(BLD_SMALL_PLOT);
+		return {12,24};
+	}	
+	
+	else if(get_res_gfx()==BLD_MEDIUM_PLOT)
+	{
+		create(BLD_MEDIUM_WHEAT_0);		
+		return {0,-16};
+	}
+	else if(get_res_gfx()==BLD_MEDIUM_WHEAT_0)
+	{	
+		create(BLD_MEDIUM_WHEAT_1);		
+		return {0,0};
+	}
+	else if(get_res_gfx()==BLD_MEDIUM_WHEAT_1)
+	{	
+		create(BLD_MEDIUM_WHEAT_2);		
+		return {0,0};
+	}
+	else if(get_res_gfx()==BLD_MEDIUM_WHEAT_2)
+	{	
+		create(BLD_MEDIUM_WHEAT_3);		
+		return {0,0};
+	}
+	else if(get_res_gfx()==BLD_MEDIUM_WHEAT_3)
+	{	
+		create(BLD_MEDIUM_PLOT);
+		return {0,16};
+	}	
+	
+	else if(get_res_gfx()==BLD_LARGE_PLOT)
+	{
+		create(BLD_LARGE_WHEAT_0);		
+		return {0,-16};
+	}
+	else if(get_res_gfx()==BLD_LARGE_WHEAT_0)
+	{	
+		create(BLD_LARGE_WHEAT_1);		
+		return {0,0};
+	}
+	else if(get_res_gfx()==BLD_LARGE_WHEAT_1)
+	{	
+		create(BLD_LARGE_WHEAT_2);		
+		return {0,0};
+	}
+	else if(get_res_gfx()==BLD_LARGE_WHEAT_2)
+	{	
+		create(BLD_LARGE_WHEAT_3);		
+		return {0,0};
+	}
+	else if(get_res_gfx()==BLD_LARGE_WHEAT_3)
+	{	
+		create(BLD_LARGE_PLOT);
+		return {0,16};
+	}	
+	return {0,0};
 }

@@ -30,7 +30,7 @@ bool Metamap::can_place(const Building* building, int row, int col) const
 	return true;
 }
 
-const Building* Metamap::building_at(int x, int y) const
+Building* Metamap::building_at(int x, int y) const
 {	
 	int r = (32 * y + 64 * x / 3 - 256) >> 9;
     int c = (32 * y - 64 * x / 3 + 256) >> 9;
@@ -70,7 +70,7 @@ void Metamap::place(Building* building, int row, int col)
 		bld_tl+=stride;
 	}				
 	
-	int mid_r = min1r + 2*((max1r-min1r)/2);
+	int mid_r = min1r + ((max1r-min1r)/2);
 	
 	assert(mid_r>=0);
 	
@@ -194,4 +194,34 @@ Metamap::~Metamap()
 	delete[] map_metadata; 
 	delete[] bld_addr;
 	delete[] buildings;
+}
+
+void Metamap::update_crops(Building* building)
+{	
+	Record* rec = nullptr;
+	for(int r=0;r<=72 && !rec;r++)
+	{
+		for(int i=0;i<buildings[r].size();i++)
+		{
+			if(buildings[r][i].building == building)
+			{
+				rec = &buildings[r][i];				
+				break;
+			}
+		}		
+	}	
+	if(rec == nullptr) return;
+	
+	if(!(building->is_empty_plot() || building->is_crops_growing() || building->is_crops_ready()))
+	{		
+		return;
+	}
+
+	Astralbrew::Point<short> rpos = rec->building->crops_next_stage();
+	rec->x+=rpos.x;
+	rec->y+=rpos.y;
+	rec->width = rec->building->get_px_width();
+	rec->height = rec->building->get_px_height();
+	
+	
 }

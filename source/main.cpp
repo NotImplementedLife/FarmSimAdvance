@@ -299,7 +299,7 @@ public:
 	inline static constexpr int ACTION_CROPS_GROWING = 2<<8;
 	inline static constexpr int ACTION_CHICKEN_FEED = 3<<8;
 	
-	const Building*  sel_building = nullptr;
+	Building*  sel_building = nullptr;
 	
 	void process_keys_down(int keys)
 	{
@@ -323,9 +323,13 @@ public:
 						{							
 							launch_menu(IconSprite::MENU_ACTIONS | ACTION_FREE_PLOT);
 						}
+						else if(sel_building->is_crops_growing())
+						{
+							launch_menu(IconSprite::MENU_ACTIONS | ACTION_FREE_PLOT);
+						}
 						else if(sel_building->is_crops_ready())
 						{
-														
+							launch_menu(IconSprite::MENU_ACTIONS | ACTION_FREE_PLOT);
 						}
 						else if(sel_building->is_chicken_coop())
 						{
@@ -501,13 +505,21 @@ private:
 			menu_cancel();
 			switch(icon_id)
 			{
-				case 3:					
+				case 3: // REMOVE
 					metamap.remove(sel_building);								
 					// force redraw				
 					draw_refresh = true;
 					draw_building_scheduled = true;							
 					
 					break;
+				case 0: // PLANT SEEDS
+					metamap.update_crops(sel_building);
+					
+					draw_refresh = true;
+					draw_building_scheduled = true;		
+					break;
+				default:
+					FATAL_ERROR(sf24(icon_id).to_string());
 			}
 		}
 	}
