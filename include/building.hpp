@@ -38,12 +38,14 @@ extern char COL_3x3_64[];
 void init_buildings_gfx();
 
 
-class Building
+class Building 
 {
 private:
 	const short* res_gfx;
-	int px_width, px_height;
-	int rows_count, cols_count;	
+	char px_width;
+	char px_height;
+	char rows_count;
+	char cols_count;	
 	const char* collision_matrix;
 public:
 	Building(const short* res_gfx, int px_width, int px_height, int rows_count, int cols_count, const char* collision_matrix);
@@ -80,7 +82,7 @@ public:
 	bool is_chicken_coop() const;
 	
 	Astralbrew::Point<short> crops_next_stage();
-};
+} __attribute__((packed));
 
 class BuildingSprite : public Astralbrew::Entity::Sprite
 {

@@ -221,7 +221,5 @@ void Metamap::update_crops(Building* building)
 	rec->x+=rpos.x;
 	rec->y+=rpos.y;
 	rec->width = rec->building->get_px_width();
-	rec->height = rec->building->get_px_height();
-	
-	
+	rec->height = rec->building->get_px_height();	
 }

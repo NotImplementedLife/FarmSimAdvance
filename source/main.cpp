@@ -17,6 +17,8 @@ using namespace Astralbrew::Objects;
 
 #include "metamap.hpp"
 
+#include "timer.hpp"
+
 class MainScene : public Scene
 {	
 private:			
@@ -31,6 +33,8 @@ private:
 
 	Cursor* cursor;
 	
+	Farm farm;
+	TimerProcessor timer_processor = TimerProcessor(&farm);	
 
 	void display(int x0, int y0, int r0, int r1)
 	{						
@@ -160,8 +164,9 @@ public:
 		
 		IconSprite::init_gfx();			
 		
-		cursor = new Cursor();
-				
+		cursor = new Cursor();			
+
+		farm.set_metamap(&metamap);
 	}	
 	
 	int frame_cnt = 0;	
@@ -232,6 +237,16 @@ public:
 				mvx=mvy=0;
 				flip_page();
 				
+				if(mode==MODE_SELECT)
+				{
+					int timer_result = timer_processor.update();
+					if(timer_result & TimerFlags::FORCE_REDRAW)
+					{
+						draw_refresh = true;
+						draw_building_scheduled = true;
+					}
+				}
+				
 				if(building_sprite!=nullptr) 
 				{
 					adjust_building_sprite_pos();
@@ -283,17 +298,6 @@ public:
 		}			
 		return false;
 	}	
-	
-	
-	#define VOLADDR(addr, type) (*(type volatile *)(addr))
-	#define REG_NOCASH_LOG      VOLADDR(0x04FFFA1C, u8)
-	
-	void no$log(const char* str)
-	{
-		while(*str)
-			REG_NOCASH_LOG = *str++;
-		REG_NOCASH_LOG = '\n';
-	}
 	
 	inline static constexpr int ACTION_FREE_PLOT = 1<<8;
 	inline static constexpr int ACTION_CROPS_GROWING = 2<<8;
@@ -506,17 +510,21 @@ private:
 			switch(icon_id)
 			{
 				case 3: // REMOVE
-					metamap.remove(sel_building);								
+					metamap.remove(sel_building);		
+					timer_processor.remove_building(sel_building);
 					// force redraw				
 					draw_refresh = true;
 					draw_building_scheduled = true;							
 					
 					break;
-				case 0: // PLANT SEEDS
-					metamap.update_crops(sel_building);
-					
-					draw_refresh = true;
-					draw_building_scheduled = true;		
+				case 0: // PLANT SEEDS				
+					if(sel_building->is_empty_plot())
+					{
+						metamap.update_crops(sel_building);					
+						draw_refresh = true;
+						draw_building_scheduled = true;		
+						timer_processor.add_timer(new CropsTimer(sel_building));	
+					}
 					break;
 				default:
 					FATAL_ERROR(sf24(icon_id).to_string());
