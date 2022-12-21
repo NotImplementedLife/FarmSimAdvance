@@ -41,6 +41,7 @@ enum TimerFlags
 class ChickenTimer : public Timer
 {
 public:
+	ChickenTimer(Building* building);
 	virtual int on_tick_end(Farm* farm) override;
 };
 

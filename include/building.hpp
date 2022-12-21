@@ -24,6 +24,8 @@ extern short BLD_LARGE_WHEAT_1  [];
 extern short BLD_LARGE_WHEAT_2  [];
 extern short BLD_LARGE_WHEAT_3  [];
 
+extern short BLD_CHICKEN_COOP_READY [];
+
 extern char COL_1x1_16[];
 extern char COL_2x2_32[];
 extern char COL_3x3_48[];
@@ -81,11 +83,16 @@ public:
 	bool is_crops_growing() const;
 	bool is_crops_ready() const;
 	bool is_chicken_coop() const;
+	bool is_chicken_coop_ready() const;
 	
 	void set_watered(bool value = true);
 	bool is_watered() const;	
 	
-	Astralbrew::Point<short> crops_next_stage();
+	void set_feed(bool value = true);
+	bool is_feed() const;
+	
+	Astralbrew::Point<short> next_stage();
+	
 } __attribute__((packed));
 
 class BuildingSprite : public Astralbrew::Entity::Sprite

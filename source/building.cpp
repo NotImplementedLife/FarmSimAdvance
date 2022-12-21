@@ -38,6 +38,9 @@ short BLD_LARGE_WHEAT_2  [72 * 64 / 2];
 __attribute__((section(".ewram.bld")))
 short BLD_LARGE_WHEAT_3  [72 * 64 / 2];
 
+__attribute__((section(".ewram.bld")))
+short BLD_CHICKEN_COOP_READY [120 * 80 / 2];
+
 
 #include "map.h"
 void extract_from_map(short* dest, int x, int y,int w, int h)
@@ -77,6 +80,8 @@ void init_buildings_gfx()
 	extract_from_map(BLD_LARGE_WHEAT_1, 1812, 344, 72, 64);
 	extract_from_map(BLD_LARGE_WHEAT_2, 1956, 344, 72, 64);
 	extract_from_map(BLD_LARGE_WHEAT_3, 2100, 344, 72, 64);
+	
+	extract_from_map(BLD_CHICKEN_COOP_READY, 2076, 424, 120, 80);
 }
 
 
@@ -125,6 +130,10 @@ void Building::create(const short* res_gfx)
 	else if(res_gfx == BLD_LARGE_WHEAT_0 || res_gfx == BLD_LARGE_WHEAT_1 || res_gfx == BLD_LARGE_WHEAT_2 || res_gfx == BLD_LARGE_WHEAT_3)
 	{
 		px_width = 72; px_height = 64; rows_count = 7; cols_count = 3; collision_matrix = COL_3x3_64;
+	}
+	else if(res_gfx == BLD_CHICKEN_COOP_READY)	
+	{
+		px_width = 120, px_height = 80, rows_count = 9, cols_count = 5; collision_matrix=COL_4x4_80; return;
 	}
 	else
 	{
@@ -278,7 +287,12 @@ bool Building::is_chicken_coop() const
 	return get_res_gfx() == BLD_CHICKEN_COOP;
 }
 
-Point<short> Building::crops_next_stage()
+bool Building::is_chicken_coop_ready() const
+{
+	return get_res_gfx() == BLD_CHICKEN_COOP_READY;
+}
+
+Point<short> Building::next_stage()
 {
 	if(get_res_gfx()==BLD_SMALL_PLOT)
 	{
@@ -357,10 +371,22 @@ Point<short> Building::crops_next_stage()
 		create(BLD_LARGE_PLOT);
 		return {0,16};
 	}	
+	else if(get_res_gfx()==BLD_CHICKEN_COOP)
+	{
+		create(BLD_CHICKEN_COOP_READY);
+		return {0,0};
+	}
+	else if(get_res_gfx()==BLD_CHICKEN_COOP_READY)
+	{
+		create(BLD_CHICKEN_COOP);
+		return {0,0};
+	}
+	
 	return {0,0};
 }
 
 static constexpr int BLDF_WATERED = (1<<0);
+static constexpr int BLDF_FEED = (1<<1);
 
 void Building::set_watered(bool value)
 {
@@ -372,4 +398,17 @@ void Building::set_watered(bool value)
 bool Building::is_watered() const
 {
 	return flags & BLDF_WATERED;
+}
+
+void Building::set_feed(bool value)
+{
+	if(value)
+		flags|=BLDF_FEED;
+	else 
+		flags&=~BLDF_FEED;
+}
+
+bool Building::is_feed() const
+{
+	return flags & BLDF_FEED;	
 }

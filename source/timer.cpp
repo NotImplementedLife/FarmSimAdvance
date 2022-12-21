@@ -19,12 +19,11 @@ bool Timer::done() const { return ticks_count==0; }
 CropsTimer::CropsTimer(Building* building) : Timer(building, 20) { }
 
 int CropsTimer::on_tick_end(Farm* farm) 
-{
-	no$log("crops");
+{	
 	if(stage<3)
 	{
 		stage++;
-		farm->get_metamap()->update_crops(target_building);
+		farm->get_metamap()->update(target_building);
 		
 		ticks_count = stage==3 ? 0 : (target_building->is_watered() ? 10:20);
 		
@@ -33,9 +32,13 @@ int CropsTimer::on_tick_end(Farm* farm)
 	return 0;
 }
 
+ChickenTimer::ChickenTimer(Building* building) : Timer(building, 30)
+{ }
+
 int ChickenTimer::on_tick_end(Farm* farm)
 {
-	return 0;
+	farm->get_metamap()->update(target_building);
+	return FORCE_REDRAW;	
 }
 
 namespace

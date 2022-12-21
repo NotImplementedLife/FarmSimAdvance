@@ -196,7 +196,7 @@ Metamap::~Metamap()
 	delete[] buildings;
 }
 
-void Metamap::update_crops(Building* building)
+void Metamap::update(Building* building)
 {	
 	Record* rec = nullptr;
 	for(int r=0;r<=72 && !rec;r++)
@@ -212,14 +212,20 @@ void Metamap::update_crops(Building* building)
 	}	
 	if(rec == nullptr) return;
 	
-	if(!(building->is_empty_plot() || building->is_crops_growing() || building->is_crops_ready()))
+	if(building->is_empty_plot() || building->is_crops_growing() || building->is_crops_ready())
 	{		
-		return;
+		Astralbrew::Point<short> rpos = rec->building->next_stage();
+		rec->x+=rpos.x;
+		rec->y+=rpos.y;
+		rec->width = rec->building->get_px_width();
+		rec->height = rec->building->get_px_height();	
 	}
-
-	Astralbrew::Point<short> rpos = rec->building->crops_next_stage();
-	rec->x+=rpos.x;
-	rec->y+=rpos.y;
-	rec->width = rec->building->get_px_width();
-	rec->height = rec->building->get_px_height();	
+	else if(building->is_chicken_coop() || building->is_chicken_coop_ready())
+	{
+		Astralbrew::Point<short> rpos = rec->building->next_stage();
+		rec->x+=rpos.x;
+		rec->y+=rpos.y;
+		rec->width = rec->building->get_px_width();
+		rec->height = rec->building->get_px_height();	
+	}		
 }

@@ -341,14 +341,28 @@ public:
 						}
 						else if(sel_building->is_crops_ready())
 						{
-							metamap.update_crops(sel_building);	// return to empty plot
+							metamap.update(sel_building);	// return to empty plot
 							draw_refresh = true;
 							draw_building_scheduled = true;			
 							sel_building->set_watered(false);
 						}
 						else if(sel_building->is_chicken_coop())
 						{
-							launch_menu(IconSprite::MENU_ACTIONS | ACTION_CHICKEN_FEED);
+							if(!sel_building->is_feed())
+							{
+								launch_menu(IconSprite::MENU_ACTIONS | ACTION_CHICKEN_FEED);
+							}
+							else
+							{
+								launch_menu(IconSprite::MENU_ACTIONS | ACTION_REMOVE_ONLY);
+							}
+						}
+						else if(sel_building->is_chicken_coop_ready())
+						{
+							metamap.update(sel_building);
+							draw_refresh = true;
+							draw_building_scheduled = true;			
+							sel_building->set_feed(false);
 						}
 					}
 				}
@@ -539,7 +553,7 @@ private:
 				case 0: // PLANT SEEDS				
 					if(sel_building->is_empty_plot())
 					{
-						metamap.update_crops(sel_building);					
+						metamap.update(sel_building);					
 						draw_refresh = true;
 						draw_building_scheduled = true;		
 						timer_processor.add_timer(new CropsTimer(sel_building));	
@@ -549,6 +563,13 @@ private:
 					if(sel_building->is_crops_growing())
 					{						
 						sel_building->set_watered();
+					}
+					break;
+				case 2:
+					if(sel_building->is_chicken_coop())
+					{						
+						sel_building->set_feed();
+						timer_processor.add_timer(new ChickenTimer(sel_building));
 					}
 					break;
 				default:

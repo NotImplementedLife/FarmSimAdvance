@@ -39,7 +39,7 @@ public:
 	
 	void remove(const Building* building);	
 	
-	void update_crops(Building* building);
+	void update(Building* building);
 	
 	~Metamap();
 };
