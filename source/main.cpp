@@ -302,6 +302,7 @@ public:
 	inline static constexpr int ACTION_FREE_PLOT = 1<<8;
 	inline static constexpr int ACTION_CROPS_GROWING = 2<<8;
 	inline static constexpr int ACTION_CHICKEN_FEED = 3<<8;
+	inline static constexpr int ACTION_REMOVE_ONLY = 4<<8;
 	
 	Building*  sel_building = nullptr;
 	
@@ -329,11 +330,21 @@ public:
 						}
 						else if(sel_building->is_crops_growing())
 						{
-							launch_menu(IconSprite::MENU_ACTIONS | ACTION_FREE_PLOT);
+							if(!sel_building->is_watered())
+							{
+								launch_menu(IconSprite::MENU_ACTIONS | ACTION_CROPS_GROWING);
+							}
+							else
+							{
+								launch_menu(IconSprite::MENU_ACTIONS | ACTION_REMOVE_ONLY);
+							}
 						}
 						else if(sel_building->is_crops_ready())
 						{
-							launch_menu(IconSprite::MENU_ACTIONS | ACTION_FREE_PLOT);
+							metamap.update_crops(sel_building);	// return to empty plot
+							draw_refresh = true;
+							draw_building_scheduled = true;			
+							sel_building->set_watered(false);
 						}
 						else if(sel_building->is_chicken_coop())
 						{
@@ -434,19 +445,27 @@ private:
 			switch(menu_type & 0xFF00)
 			{
 				case ACTION_FREE_PLOT:
-					icons[k++] = new IconSprite(0);					
+					icons[k++] = new IconSprite(0);			
+					icons[k++] = new IconSprite(3);
+					icons[k-1]->set_position(icons[k-1]->pos_x()-k*40,icons[k-1]->pos_y());					
 					break;
 				case ACTION_CROPS_GROWING:
 					icons[k++] = new IconSprite(1);
 					icons[k-1]->set_position(icons[k-1]->pos_x()-40,icons[k-1]->pos_y());
+					icons[k++] = new IconSprite(3);
+					icons[k-1]->set_position(icons[k-1]->pos_x()-k*40,icons[k-1]->pos_y());					
 					break;
 				case ACTION_CHICKEN_FEED:
 					icons[k++] = new IconSprite(2);
 					icons[k-1]->set_position(icons[k-1]->pos_x()-80,icons[k-1]->pos_y());
+					icons[k++] = new IconSprite(3);
+					icons[k-1]->set_position(icons[k-1]->pos_x()-k*40,icons[k-1]->pos_y());					
 					break;
-			}
-			icons[k++] = new IconSprite(3);
-			icons[k-1]->set_position(icons[k-1]->pos_x()-k*40,icons[k-1]->pos_y());
+				case ACTION_REMOVE_ONLY:
+					icons[k++] = new IconSprite(3);
+					icons[k-1]->set_position(icons[k-1]->pos_x()-120,icons[k-1]->pos_y());			
+					break;
+			}			
 		}
 		else
 		{
@@ -524,6 +543,12 @@ private:
 						draw_refresh = true;
 						draw_building_scheduled = true;		
 						timer_processor.add_timer(new CropsTimer(sel_building));	
+					}
+					break;
+				case 1: // WATER PLANTS
+					if(sel_building->is_crops_growing())
+					{						
+						sel_building->set_watered();
 					}
 					break;
 				default:

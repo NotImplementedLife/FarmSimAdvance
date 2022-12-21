@@ -359,3 +359,17 @@ Point<short> Building::crops_next_stage()
 	}	
 	return {0,0};
 }
+
+static constexpr int BLDF_WATERED = (1<<0);
+
+void Building::set_watered(bool value)
+{
+	if(value)
+		flags|=BLDF_WATERED;
+	else 
+		flags&=~BLDF_WATERED;
+}
+bool Building::is_watered() const
+{
+	return flags & BLDF_WATERED;
+}

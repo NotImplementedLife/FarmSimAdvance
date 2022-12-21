@@ -26,7 +26,7 @@ int CropsTimer::on_tick_end(Farm* farm)
 		stage++;
 		farm->get_metamap()->update_crops(target_building);
 		
-		ticks_count = stage==3 ? 0 : 20;
+		ticks_count = stage==3 ? 0 : (target_building->is_watered() ? 10:20);
 		
 		return FORCE_REDRAW;
 	}	
@@ -108,4 +108,17 @@ void TimerProcessor::remove_building(Building* building)
 			update_freq();
 		}
 	}	
+}
+
+Timer* TimerProcessor::get_timer(Building* building) const
+{
+	for(int i=0;i<active_timers.size();i++)
+	{
+		Timer* timer = active_timers[i];
+		if(timer->get_building()==building)
+		{			
+			return timer;						
+		}		
+	}
+	return nullptr;
 }

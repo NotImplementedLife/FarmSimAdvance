@@ -56,6 +56,8 @@ public:
 	void add_timer(Timer* timer);
 	int update();	
 	
+	Timer* get_timer(Building* building) const;
+	
 	void remove_building(Building* building);
 	~TimerProcessor() = default;
 };

@@ -47,6 +47,7 @@ private:
 	char rows_count;
 	char cols_count;	
 	const char* collision_matrix;
+	int flags = 0;
 public:
 	Building(const short* res_gfx, int px_width, int px_height, int rows_count, int cols_count, const char* collision_matrix);
 	Building(const short* res_gfx); // and let the code choose the right settings
@@ -80,6 +81,9 @@ public:
 	bool is_crops_growing() const;
 	bool is_crops_ready() const;
 	bool is_chicken_coop() const;
+	
+	void set_watered(bool value = true);
+	bool is_watered() const;	
 	
 	Astralbrew::Point<short> crops_next_stage();
 } __attribute__((packed));
