@@ -292,6 +292,15 @@ bool Building::is_chicken_coop_ready() const
 	return get_res_gfx() == BLD_CHICKEN_COOP_READY;
 }
 
+int Building::get_tiles_count() const
+{
+	if(collision_matrix==COL_1x1_16) return 1;
+	if(collision_matrix==COL_2x2_32 || collision_matrix==COL_2x2_48) return 4;
+	if(collision_matrix==COL_3x3_48) return 9;
+	if(collision_matrix==COL_4x4_80) return 16;
+	return 0;
+}
+
 Point<short> Building::next_stage()
 {
 	if(get_res_gfx()==BLD_SMALL_PLOT)

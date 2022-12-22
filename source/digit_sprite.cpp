@@ -19,6 +19,12 @@ DigitSprite::DigitSprite(int digit, int pal) : Sprite(ObjSize::SIZE_8x8, ObjBitD
 	update_position(nullptr);
 }
 
+void DigitSprite::set_digit(int digit)
+{
+	vram_addr.set_value((void*)(0x06017C80 + 32*digit));
+	update_position(nullptr);
+}
+
 #include "digits.h"
 
 void DigitSprite::init_gfx()

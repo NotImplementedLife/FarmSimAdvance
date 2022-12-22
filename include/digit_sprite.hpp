@@ -9,6 +9,7 @@ private:
 public:
 	DigitSprite(int digit, int pal);
 	
+	void set_digit(int digit);
 	static void init_gfx();
 	~DigitSprite() = default;
 };

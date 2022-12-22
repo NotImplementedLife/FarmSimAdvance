@@ -18,5 +18,11 @@ public:
 	int get_balance() const;
 	Metamap* get_metamap() const;
 	
+	bool use_wheat(int quant);
+	void add_wheat(int quant);
+	
+	bool use_eggs(int quant);
+	void add_eggs(int quant);	
+	
 	void set_metamap(Metamap* metamap);
 };

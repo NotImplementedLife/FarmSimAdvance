@@ -186,6 +186,11 @@ public:
 			eggs_no[i]->set_position(228-6*i, 16);
 			eggs_no[i]->update_position(nullptr);
 		}			
+		
+		farm.add_wheat(10);
+		
+		update_wheat_count();
+		update_eggs_count();
 	}	
 	
 	DigitSprite* wheat_icon = new DigitSprite(10, 0xC);
@@ -194,6 +199,45 @@ public:
 	DigitSprite* wheat_no[7];
 	DigitSprite* eggs_no[7];
 	
+	void update_wheat_count()
+	{
+		int q = farm.get_wheat_count();
+		for(int i=0;i<7;i++)
+		{
+			wheat_no[i]->set_digit(q%10); q/=10;
+			wheat_no[i]->update_visual();
+		}
+	}
+	
+	void update_eggs_count()
+	{
+		int q = farm.get_eggs_count();
+		for(int i=0;i<7;i++)
+		{
+			eggs_no[i]->set_digit(q%10); q/=10;
+			eggs_no[i]->update_visual();
+		}
+	}
+	
+	void add_wheat(int q)
+	{
+		farm.add_wheat(q);
+		update_wheat_count();
+	}
+	
+	void add_eggs(int q)
+	{
+		farm.add_eggs(q);
+		update_eggs_count();
+	}
+	
+	bool use_wheat(int q)
+	{
+		bool result = farm.use_wheat(q);
+		if(result)
+			update_wheat_count();
+		return result;
+	}
 	
 	int frame_cnt = 0;	
 	
@@ -371,6 +415,11 @@ public:
 							draw_refresh = true;
 							draw_building_scheduled = true;			
 							sel_building->set_watered(false);
+							
+							int tc = sel_building->get_tiles_count();
+							if(tc==1) add_wheat(2);
+							if(tc==4) add_wheat(9);
+							if(tc==9) add_wheat(20);
 						}
 						else if(sel_building->is_chicken_coop())
 						{
@@ -389,6 +438,7 @@ public:
 							draw_refresh = true;
 							draw_building_scheduled = true;			
 							sel_building->set_feed(false);
+							add_eggs(1);
 						}
 					}
 				}
@@ -582,10 +632,13 @@ private:
 				case 0: // PLANT SEEDS				
 					if(sel_building->is_empty_plot())
 					{
-						metamap.update(sel_building);					
-						draw_refresh = true;
-						draw_building_scheduled = true;		
-						timer_processor.add_timer(new CropsTimer(sel_building));	
+						if(use_wheat(sel_building->get_tiles_count()))
+						{
+							metamap.update(sel_building);					
+							draw_refresh = true;
+							draw_building_scheduled = true;		
+							timer_processor.add_timer(new CropsTimer(sel_building));	
+						}
 					}
 					break;
 				case 1: // WATER PLANTS
@@ -597,8 +650,11 @@ private:
 				case 2:
 					if(sel_building->is_chicken_coop())
 					{						
-						sel_building->set_feed();
-						timer_processor.add_timer(new ChickenTimer(sel_building));
+						if(use_wheat(150))
+						{
+							sel_building->set_feed();
+							timer_processor.add_timer(new ChickenTimer(sel_building));
+						}
 					}
 					break;
 				default:

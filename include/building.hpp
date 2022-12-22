@@ -85,6 +85,8 @@ public:
 	bool is_chicken_coop() const;
 	bool is_chicken_coop_ready() const;
 	
+	int get_tiles_count() const;
+	
 	void set_watered(bool value = true);
 	bool is_watered() const;	
 	
