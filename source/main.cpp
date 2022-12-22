@@ -182,7 +182,7 @@ public:
 			wheat_no[i]->set_position(228-6*i, 6);
 			wheat_no[i]->update_position(nullptr);
 			
-			eggs_no[i] = new DigitSprite(0, 0xC);
+			eggs_no[i] = new DigitSprite(0, 0xF);
 			eggs_no[i]->set_position(228-6*i, 16);
 			eggs_no[i]->update_position(nullptr);
 		}			
@@ -191,6 +191,8 @@ public:
 		
 		update_wheat_count();
 		update_eggs_count();
+		
+		schedule_task(&red_blink_wheat);
 	}	
 	
 	DigitSprite* wheat_icon = new DigitSprite(10, 0xC);
@@ -203,8 +205,8 @@ public:
 	{
 		int q = farm.get_wheat_count();
 		for(int i=0;i<7;i++)
-		{
-			wheat_no[i]->set_digit(q%10); q/=10;
+		{						
+			wheat_no[i]->set_digit(q%10); q/=10;						
 			wheat_no[i]->update_visual();
 		}
 	}
@@ -213,7 +215,7 @@ public:
 	{
 		int q = farm.get_eggs_count();
 		for(int i=0;i<7;i++)
-		{
+		{			
 			eggs_no[i]->set_digit(q%10); q/=10;
 			eggs_no[i]->update_visual();
 		}
@@ -639,6 +641,11 @@ private:
 							draw_building_scheduled = true;		
 							timer_processor.add_timer(new CropsTimer(sel_building));	
 						}
+						else
+						{
+							if(!red_blink_wheat.is_active())
+								red_blink_wheat.set_counter(32);
+						}
 					}
 					break;
 				case 1: // WATER PLANTS
@@ -653,7 +660,12 @@ private:
 						if(use_wheat(150))
 						{
 							sel_building->set_feed();
-							timer_processor.add_timer(new ChickenTimer(sel_building));
+							timer_processor.add_timer(new ChickenTimer(sel_building));							
+						}
+						else
+						{
+							if(!red_blink_wheat.is_active())
+								red_blink_wheat.set_counter(32);
 						}
 					}
 					break;
@@ -783,6 +795,26 @@ private:
 	};
 	
 	MenuOptionMoveTask menu_move_task = MenuOptionMoveTask(this);
+	
+	
+	class RedBlink : public ScheduledTask
+	{
+	private:
+		MainScene* scene = nullptr;		
+		int slot;
+		int q = 0;
+	public:
+		RedBlink(MainScene* scene, int bank) : ScheduledTask(1, -1), scene(scene), slot(bank*16+0xC) { }		
+
+		void action() override
+		{
+			q++;
+			SPRITE_PALETTE[slot] = (q%8>=4) ? Drawing::Colors::Red : Drawing::Colors::White;
+		}
+	};
+	
+	RedBlink red_blink_wheat = RedBlink(this, 0xC);
+	//RedBlink red_blink_eggs = RedBlink(this, 0xF);
 };
 
 astralbrew_launch_with_splash(MainScene);
