@@ -6,6 +6,7 @@
 #include "building.hpp"
 #include "icon_sprite.hpp"
 #include "cursor_sprite.hpp"
+#include "digit_sprite.hpp"
 
 using namespace Astralbrew::World;
 using namespace Astralbrew;
@@ -163,11 +164,36 @@ public:
 		SPRITE_PALETTE[0xCF] = Drawing::Colors::Red;
 		
 		IconSprite::init_gfx();			
+		DigitSprite::init_gfx();
 		
 		cursor = new Cursor();			
 
-		farm.set_metamap(&metamap);
+		farm.set_metamap(&metamap);	
+		
+		wheat_icon->set_position(236,6);
+		wheat_icon->update_position(nullptr);
+		
+		egg_icon->set_position(236,16);
+		egg_icon->update_position(nullptr);
+		
+		for(int i=0;i<7;i++)
+		{
+			wheat_no[i] = new DigitSprite(0, 0xC);
+			wheat_no[i]->set_position(228-6*i, 6);
+			wheat_no[i]->update_position(nullptr);
+			
+			eggs_no[i] = new DigitSprite(0, 0xC);
+			eggs_no[i]->set_position(228-6*i, 16);
+			eggs_no[i]->update_position(nullptr);
+		}			
 	}	
+	
+	DigitSprite* wheat_icon = new DigitSprite(10, 0xC);
+	DigitSprite* egg_icon = new DigitSprite(11, 0xF);
+	
+	DigitSprite* wheat_no[7];
+	DigitSprite* eggs_no[7];
+	
 	
 	int frame_cnt = 0;	
 	
@@ -440,6 +466,9 @@ public:
 	~MainScene() 
 	{
 		delete[] row;		
+		
+		delete wheat_icon;
+		delete egg_icon;
 	}
 	
 private:	
